@@ -1,0 +1,15 @@
+/home/johannes/IdeaProjects/match-me/backend/src/main/java/com/matchme/auth/dto/AuthRequest.java
+/home/johannes/IdeaProjects/match-me/backend/src/main/java/com/matchme/auth/dto/AuthResponse.java
+/home/johannes/IdeaProjects/match-me/backend/src/main/java/com/matchme/auth/AuthService.java
+/home/johannes/IdeaProjects/match-me/backend/src/main/java/com/matchme/auth/AuthController.java
+/home/johannes/IdeaProjects/match-me/backend/src/main/java/com/matchme/MatchMeApplication.java
+/home/johannes/IdeaProjects/match-me/backend/src/main/java/com/matchme/chat/MessageRepository.java
+/home/johannes/IdeaProjects/match-me/backend/src/main/java/com/matchme/security/JwtUtil.java
+/home/johannes/IdeaProjects/match-me/backend/src/main/java/com/matchme/security/SecurityConfig.java
+/home/johannes/IdeaProjects/match-me/backend/src/main/java/com/matchme/chat/ChatController.java
+/home/johannes/IdeaProjects/match-me/backend/src/main/java/com/matchme/chat/Message.java
+/home/johannes/IdeaProjects/match-me/backend/src/main/java/com/matchme/user/User.java
+/home/johannes/IdeaProjects/match-me/backend/src/main/java/com/matchme/websocket/WebSocketConfig.java
+/home/johannes/IdeaProjects/match-me/backend/src/main/java/com/matchme/security/JwtFilter.java
+/home/johannes/IdeaProjects/match-me/backend/src/main/java/com/matchme/user/UserRepository.java
+/home/johannes/IdeaProjects/match-me/backend/src/main/java/com/matchme/websocket/ChatWebSocketHandler.java
