@@ -1,35 +1,32 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useAuth } from "./hooks/useAuth";
+import Login from "./pages/auth/Login";
+import Register from "./pages/auth/Register";
+import ChatList from "./pages/chat/ChatList";
+import ChatView from "./pages/chat/ChatView";
 
-function App() {
-  const [count, setCount] = useState(0)
-
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+function PrivateRoute({ children }: { children: React.ReactNode }) {
+    const { isLoggedIn } = useAuth();
+    return isLoggedIn ? <>{children}</> : <Navigate to="/login" />;
 }
 
-export default App
+export default function App() {
+    const { isLoggedIn, logout } = useAuth();
+
+    return (
+        <BrowserRouter>
+            {isLoggedIn && (
+                <nav className="navbar">
+                    <span className="nav-brand">match-me</span>
+                    <button onClick={logout}>Log out</button>
+                </nav>
+            )}
+            <Routes>
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/" element={<PrivateRoute><ChatList /></PrivateRoute>} />
+                <Route path="/chat/:userId" element={<PrivateRoute><ChatView /></PrivateRoute>} />
+            </Routes>
+        </BrowserRouter>
+    );
+}
