@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="003" author="person3">
+        <createTable tableName="connections">
+            <!-- UUID for the connection, standalone primary key -->
+            <column name="id" type="uuid" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <!-- Foreign keys linking to UUID users -->
+            <column name="sender_id" type ="uuid">
+                <constraints nullable="false" foreignKeyName="fk_conn_sender" references="users(id)"/>
+            </column>
+            <column name="receiver_id" type="uuid">
+                <constraints nullable="false" foreignKeyName="fk_conn_receiver" references="users(id)"/>
+            </column>
+
+            <!-- Status management (pending/accepted/declined) -->
+            <column name="status" type="varchar(20)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created_at" type="timestamptz" defaultValueComputed="now()">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- Prevents user to send a duplicate pending connection request to the same user -->
+        <addUniqueConstraint
+            tableName="connections"
+            columnNames="sender_id, receiver_id"
+            constraintName="uq_conn_sender_receiver"/>
+        
+        <!-- Index to find all connections a user has -->
+        <createIndex tableName="connections" indexName="idx_connections_user">
+            <column name="sender_id"/>
+            <column name="receiver_id"/>
+        </createIndex>
+
+    </changeSet>
+</databaseChangeLog>
