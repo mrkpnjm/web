@@ -14,8 +14,8 @@ locations: id(SERIAL PK), city(NOT NULL), country(NOT NULL)
 dismissed_recommendations: id(UUID PK), user_id(FK users),
 dismissed_id(FK users), created_at
 
-connections: id(UUID PK), requester_id(FK users), receiver_id(FK users),
-status(pending/accepted/dismissed), created_at
+connections: id(UUID PK), sender_id(FK fk_conn_sender), receiver_id(FK fk_conn_receiver),
+status(pending/accepted/declined), created_at
 
 messages: id(UUID PK), sender_id(FK users), receiver_id(FK users),
 content(NOT NULL), read(bool), created_at
