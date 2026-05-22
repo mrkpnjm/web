@@ -5,3 +5,4 @@ dist/
 frontend/dist/
 .idea/
 backend/target/
+.vscode/
