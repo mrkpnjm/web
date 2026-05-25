@@ -1,10 +1,11 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./hooks/useAuth";
+import { WebSocketProvider } from "./context/WebSocketContext";
+import { MainLayout } from "./components/MainLayout";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import ChatList from "./pages/chat/ChatList";
 import ChatView from "./pages/chat/ChatView";
-import { MainLayout } from "./components/MainLayout";
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
     const { isLoggedIn } = useAuth();
@@ -12,35 +13,22 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-    // const { isLoggedIn, logout } = useAuth();
+    const { isLoggedIn } = useAuth();
+    const token = localStorage.getItem("token");
 
     return (
         <BrowserRouter>
-            {/* {isLoggedIn && (
-                <nav className="navbar">
-                    <span className="nav-brand">match-me</span>
-                    <button onClick={logout}>Log out</button>
-                </nav>
-            )} */}
-            <Routes>
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-
-                {/* Protected Layout Route:
-                  Wraps MainLayout inside your PrivateRoute guard.
-                  If logged in, MainLayout mounts and renders child routes via <Outlet />.
-                */}
-                <Route element={<PrivateRoute><MainLayout /></PrivateRoute>}>
-                    <Route path="/" element={<ChatList />} />
-                    <Route path="/chat/:userId" element={<ChatView />} />
-                </Route>
-
-                {/* <Route path="/" element={<PrivateRoute><ChatList /></PrivateRoute>} />
-                <Route path="/chat/:userId" element={<PrivateRoute><ChatView /></PrivateRoute>} /> */}
-
-                {/* Fallback Catch-All Route */}
-                <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
+            <WebSocketProvider token={isLoggedIn ? token : null}>
+                <Routes>
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/register" element={<Register />} />
+                    <Route element={<PrivateRoute><MainLayout /></PrivateRoute>}>
+                        <Route path="/" element={<ChatList />} />
+                        <Route path="/chat/:userId" element={<ChatView />} />
+                    </Route>
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+            </WebSocketProvider>
         </BrowserRouter>
     );
 }

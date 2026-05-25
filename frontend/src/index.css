@@ -18,6 +18,20 @@ body {
     border-bottom: 1px solid #333;
 }
 .nav-brand { font-weight: 700; font-size: 1.1rem; color: #fff; }
+.nav-links { display: flex; gap: 0.5rem; }
+.nav-link { position: relative; }
+.nav-badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background: #e53935;
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 700;
+    border-radius: 999px;
+    padding: 1px 5px;
+    pointer-events: none;
+}
 .navbar button {
     background: none;
     border: 1px solid #444;
