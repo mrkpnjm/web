@@ -1,5 +1,7 @@
 package com.matchme.chat;
 
+import com.matchme.connection.ConnectionRepository;
+import com.matchme.connection.ConnectionStatus;
 import com.matchme.user.User;
 import com.matchme.user.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +22,14 @@ public class ChatController {
 
     private final MessageRepository messageRepository;
     private final UserRepository userRepository;
+    private final ConnectionRepository connectionRepository;
     private static final int PAGE_SIZE = 30;
+
+    private void requireConnected(UUID a, UUID b) {
+        connectionRepository.findConnectionBetweenUsers(a, b)
+                .filter(c -> c.getStatus() == ConnectionStatus.ACCEPTED)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "Not connected"));
+    }
 
     @GetMapping
     public ResponseEntity<List<Map<String, Object>>> getChats(@AuthenticationPrincipal User me) {
@@ -51,6 +60,7 @@ public class ChatController {
                                                                   @RequestParam(defaultValue = "1") int page) {
         User other = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        requireConnected(me.getId(), userId);
         List<Message> messages = messageRepository.findConversation(me, other, PageRequest.of(page - 1, PAGE_SIZE));
         messageRepository.markAsRead(other, me);
         Collections.reverse(messages);
@@ -68,6 +78,7 @@ public class ChatController {
         }
         User other = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        requireConnected(me.getId(), userId);
         Message message = new Message();
         message.setSender(me);
         message.setReceiver(other);

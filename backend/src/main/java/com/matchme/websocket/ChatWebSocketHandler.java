@@ -3,6 +3,8 @@ package com.matchme.websocket;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.matchme.chat.Message;
 import com.matchme.chat.MessageRepository;
+import com.matchme.connection.ConnectionRepository;
+import com.matchme.connection.ConnectionStatus;
 import com.matchme.security.JwtUtil;
 import com.matchme.user.User;
 import com.matchme.user.UserRepository;
@@ -21,6 +23,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
     private final MessageRepository messageRepository;
+    private final ConnectionRepository connectionRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private final Map<UUID, WebSocketSession> sessions = new ConcurrentHashMap<>();
@@ -66,6 +69,11 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         User sender = userRepository.findById(senderId).orElse(null);
         User receiver = userRepository.findById(receiverId).orElse(null);
         if (sender == null || receiver == null) return;
+
+        boolean connected = connectionRepository.findConnectionBetweenUsers(senderId, receiverId)
+                .filter(c -> c.getStatus() == ConnectionStatus.ACCEPTED)
+                .isPresent();
+        if (!connected) return;
 
         Message message = new Message();
         message.setSender(sender);
