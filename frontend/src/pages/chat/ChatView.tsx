@@ -10,17 +10,21 @@ export default function ChatView() {
     const [input, setInput] = useState("");
     const [isTyping, setIsTyping] = useState(false);
     const [otherTyping, setOtherTyping] = useState(false);
+    const [otherOnline, setOtherOnline] = useState(false);
     const token = localStorage.getItem("token");
     const bottomRef = useRef<HTMLDivElement>(null);
     const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const { send } = useWebSocket(token, (msg: unknown) => {
-        const m = msg as { type: string; message?: Message; from?: string; isTyping?: boolean };
+        const m = msg as { type: string; message?: Message; from?: string; isTyping?: boolean; userId?: string; online?: boolean };
         if (m.type === "message" && m.message) {
             setMessages(prev => [...prev, m.message!]);
         }
         if (m.type === "typing" && m.from === userId) {
             setOtherTyping(m.isTyping ?? false);
+        }
+        if (m.type === "online" && m.userId === userId) {
+            setOtherOnline(m.online ?? false);
         }
     });
 
@@ -57,6 +61,10 @@ export default function ChatView() {
 
     return (
         <div className="chat-view">
+            <div className="chat-header">
+                <span className={`online-dot ${otherOnline ? "online" : "offline"}`} />
+                <span className="online-label">{otherOnline ? "Online" : "Offline"}</span>
+            </div>
             <div className="messages">
                 {messages.map(msg => (
                     <div

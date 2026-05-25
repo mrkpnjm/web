@@ -1,7 +1,7 @@
 export interface User {
     id: string;
     name: string;
-    profilePicture: string | null;
+    profile_picture: string | null;
 }
 
 export interface Message {

@@ -1,15 +1,34 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../../api";
-import { Chat } from "../../types";
+import { useWebSocket } from "../../hooks/useWebSocket";
+import { Chat, User } from "../../types";
 
 export default function ChatList() {
     const [chats, setChats] = useState<Chat[]>([]);
+    const [userNames, setUserNames] = useState<Record<string, string>>({});
     const navigate = useNavigate();
+    const token = localStorage.getItem("token");
 
-    useEffect(() => {
-        api.getChats().then(setChats).catch(console.error);
-    }, []);
+    function loadChats() {
+        api.getChats().then((data: Chat[]) => {
+            setChats(data);
+            data.forEach(chat => {
+                api.getUser(chat.other_id)
+                    .then((u: User) => setUserNames(prev => ({ ...prev, [chat.other_id]: u.name })))
+                    .catch(() => {});
+            });
+        }).catch(console.error);
+    }
+
+    useEffect(() => { loadChats(); }, []);
+
+    useWebSocket(token, (msg: unknown) => {
+        const m = msg as { type: string };
+        if (m.type === "message") {
+            loadChats();
+        }
+    });
 
     return (
         <div className="page">
@@ -19,7 +38,7 @@ export default function ChatList() {
                 {chats.map(chat => (
                     <li key={chat.other_id} onClick={() => navigate(`/chat/${chat.other_id}`)}>
                         <div className="chat-info">
-                            <span className="chat-name">{chat.other_id}</span>
+                            <span className="chat-name">{userNames[chat.other_id] ?? chat.other_id}</span>
                             <span className="chat-preview">{chat.last_message}</span>
                         </div>
                         <div className="chat-meta">

@@ -110,6 +110,27 @@ body {
 }
 
 /* Chat view */
+.chat-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1rem;
+    background: #1e1e1e;
+    border-bottom: 1px solid #333;
+    max-width: 640px;
+    margin: 0 auto;
+    width: 100%;
+}
+.online-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+.online-dot.online { background: #4caf50; }
+.online-dot.offline { background: #555; }
+.online-label { font-size: 0.8rem; color: #888; }
+
 .chat-view {
     display: flex;
     flex-direction: column;

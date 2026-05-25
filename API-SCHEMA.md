@@ -3,13 +3,11 @@
 ```
 users: id(UUID PK), email(UNIQUE NOT NULL), password_hash(NOT NULL), created_at
 
-profiles: id(UUID FK users), display_name(NOT NULL), bio, avatar_url,
-location_id(FK locations), age, gender, music_genre, looking_for,
-activity_level, created_at
+profiles: id(UUID FK users), display_name, bio, avatar_url,
+location_id(FK locations), looking_for, activity_level,
+social_preference, communication_style, primary_interest, created_at
 
-interests: id(SERIAL PK), user_id(FK users), interest(NOT NULL)
-
-locations: id(SERIAL PK), city(NOT NULL), country(NOT NULL)
+locations: id(SERIAL PK), country(NOT NULL)
 
 dismissed_recommendations: id(UUID PK), user_id(FK users),
 dismissed_id(FK users), created_at
@@ -32,7 +30,8 @@ POST /auth/logout    →  { message }
 
 GET /users/:id         →  { id, name, profile_picture }
 GET /users/:id/profile →  { id, bio, location }
-GET /users/:id/bio     →  { id, age, gender, interests[], music_genre, looking_for, activity_level }
+GET /users/:id/bio     →  { id, looking_for, activity_level, social_preference,
+                            communication_style, primary_interest }
 
 GET /me         →  { id, name, profile_picture, email }
 GET /me/profile →  same as /users/:id/profile
