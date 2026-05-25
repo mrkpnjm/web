@@ -1,6 +1,12 @@
 package com.matchme.seeder;
 
-import com.matchme.user.*;
+import com.matchme.user.Interest;
+import com.matchme.user.InterestRepository;
+import com.matchme.user.Location;
+import com.matchme.user.LocationRepository;
+import com.matchme.user.ProfileRepository;
+import com.matchme.user.User;
+import com.matchme.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
@@ -100,7 +106,7 @@ public class Seeder implements CommandLineRunner {
 
             Location loc = locations.get(rng.nextInt(locations.size()));
 
-            Profile profile = new Profile();
+            com.matchme.user.Profile profile = new com.matchme.user.Profile();
             profile.setUser(user);
             profile.setDisplayName(firstName + " " + lastName);
             profile.setBio("Hi, I'm " + firstName + ". I love meeting new people.");
