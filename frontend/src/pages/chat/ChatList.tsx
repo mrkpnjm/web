@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../../api";
-import { useWebSocket } from "../../hooks/useWebSocket";
+import { useWS } from "../../context/WebSocketContext";
 import { Chat, User } from "../../types";
 
 export default function ChatList() {
     const [chats, setChats] = useState<Chat[]>([]);
     const [userNames, setUserNames] = useState<Record<string, string>>({});
     const navigate = useNavigate();
-    const token = localStorage.getItem("token");
+    const { subscribe } = useWS();
 
     function loadChats() {
         api.getChats().then((data: Chat[]) => {
@@ -23,12 +23,12 @@ export default function ChatList() {
 
     useEffect(() => { loadChats(); }, []);
 
-    useWebSocket(token, (msg: unknown) => {
-        const m = msg as { type: string };
-        if (m.type === "message") {
-            loadChats();
-        }
-    });
+    useEffect(() => {
+        return subscribe((msg: unknown) => {
+            const m = msg as { type: string };
+            if (m.type === "message") loadChats();
+        });
+    }, [subscribe]);
 
     return (
         <div className="page">

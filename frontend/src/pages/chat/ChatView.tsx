@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { api } from "../../api";
-import { useWebSocket } from "../../hooks/useWebSocket";
+import { useWS } from "../../context/WebSocketContext";
 import { Message } from "../../types";
 
 export default function ChatView() {
@@ -14,19 +14,22 @@ export default function ChatView() {
     const token = localStorage.getItem("token");
     const bottomRef = useRef<HTMLDivElement>(null);
     const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const { send, subscribe } = useWS();
 
-    const { send } = useWebSocket(token, (msg: unknown) => {
-        const m = msg as { type: string; message?: Message; from?: string; isTyping?: boolean; userId?: string; online?: boolean };
-        if (m.type === "message" && m.message) {
-            setMessages(prev => [...prev, m.message!]);
-        }
-        if (m.type === "typing" && m.from === userId) {
-            setOtherTyping(m.isTyping ?? false);
-        }
-        if (m.type === "online" && m.userId === userId) {
-            setOtherOnline(m.online ?? false);
-        }
-    });
+    useEffect(() => {
+        return subscribe((msg: unknown) => {
+            const m = msg as { type: string; message?: Message; from?: string; isTyping?: boolean; userId?: string; online?: boolean };
+            if (m.type === "message" && m.message) {
+                setMessages(prev => [...prev, m.message!]);
+            }
+            if (m.type === "typing" && m.from === userId) {
+                setOtherTyping(m.isTyping ?? false);
+            }
+            if (m.type === "online" && m.userId === userId) {
+                setOtherOnline(m.online ?? false);
+            }
+        });
+    }, [subscribe, userId]);
 
     useEffect(() => {
         if (!userId) return;
