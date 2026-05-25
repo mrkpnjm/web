@@ -1,60 +1,65 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
-    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.17.xsd">
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
 
-    <!-- 1. Locations table (Simplified to country only) -->
-    <changeSet id="create-locations-table" author="ESSKEEEETIT">
+    <changeSet id="004-person-tables" author="mark">
+
         <createTable tableName="locations">
-            <column name="id" type="SERIAL" autoIncrement="true">
-                <constraints primaryKey="true" nullable="false"/>
+            <column name="id" type="SERIAL">
+                <constraints primaryKey="true" primaryKeyName="pk_locations"/>
             </column>
-            <column name="country" type="VARCHAR(255)">
-                <constraints nullable="false"/>
-            </column>
+            <column name="city" type="VARCHAR(255)"/> 
+            <column name="country" type="VARCHAR(255)"/> 
         </createTable>
-    </changeSet>
 
-    <!-- 2. Profiles table -->
-    <changeSet id="create-profiles-table" author="ESSKEEEETIT">
         <createTable tableName="profiles">
             <column name="id" type="UUID">
-                <constraints primaryKey="true" nullable="false" foreignKeyName="fk_profiles_users" referencedTableName="users" referencedColumnNames="id"/>
+                <constraints primaryKey="true" primaryKeyName="pk_profiles" foreignKeyName="fk_profiles_users" references="users(id)"/>
             </column>
-            <column name="display_name" type="VARCHAR(255)"/>
+            <column name="display_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
             <column name="bio" type="TEXT"/>
             <column name="avatar_url" type="VARCHAR(255)"/>
             <column name="location_id" type="BIGINT">
-                <constraints foreignKeyName="fk_profiles_locations" referencedTableName="locations" referencedColumnNames="id"/>
+                <constraints foreignKeyName="fk_profiles_locations" references="locations(id)"/>
             </column>
-            
-            <!-- 5 Pre-Selected Biographical Data Points -->
-            <column name="looking_for" type="VARCHAR(50)"/>
-            <column name="activity_level" type="VARCHAR(50)"/>
-            <column name="social_preference" type="VARCHAR(50)"/>
-            <column name="communication_style" type="VARCHAR(50)"/>
-            <column name="primary_interest" type="VARCHAR(50)"/>
-            
-            <column name="created_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="age" type="INT"/>
+            <column name="gender" type="VARCHAR(50)"/>
+            <column name="music_genre" type="VARCHAR(100)"/>
+            <column name="looking_for" type="VARCHAR(255)"/>
+            <column name="activity_level" type="VARCHAR(255)"/>
+            <column name="created_at" type="timestamptz" defaultValueComputed="now()"/>
         </createTable>
-    </changeSet>
 
-    <!-- 3. Dismissed recommendations table (Required by assignment rules) -->
-    <changeSet id="create-dismissed-recommendations-table" author="ESSKEEEETIT">
-        <createTable tableName="dismissed_recommendations">
-            <column name="id" type="UUID">
-                <constraints primaryKey="true" nullable="false"/>
+        <createTable tableName="interests">
+            <column name="id" type="SERIAL">
+                <constraints primaryKey="true" primaryKeyName="pk_interests"/>
             </column>
             <column name="user_id" type="UUID">
-                <constraints nullable="false" foreignKeyName="fk_dismissed_users" referencedTableName="users" referencedColumnNames="id"/>
+                <constraints nullable="false" foreignKeyName="fk_interests_users" references="users(id)"/>
+            </column>
+            <column name="interest" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="dismissed_recommendations">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" primaryKeyName="pk_dismissed_recs"/>
+            </column>
+            <column name="user_id" type="UUID">
+                <constraints nullable="false" foreignKeyName="fk_dismissed_recs_user_id" references="users(id)"/>
             </column>
             <column name="dismissed_id" type="UUID">
-                <constraints nullable="false" foreignKeyName="fk_dismissed_dismissed_users" referencedTableName="users" referencedColumnNames="id"/>
+                <constraints nullable="false" foreignKeyName="fk_dismissed_recs_dismissed_id" references="users(id)"/>
             </column>
-            <column name="created_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="created_at" type="timestamptz" defaultValueComputed="now()"/>
         </createTable>
+
     </changeSet>
 
 </databaseChangeLog>
