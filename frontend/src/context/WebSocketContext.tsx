@@ -20,8 +20,19 @@ export function WebSocketProvider({ token, children }: { token: string | null; c
 
     useEffect(() => {
         if (!token) return;
+
+        let isMounted = true;
         const socket = new WebSocket(`${WS_URL}?token=${token}`);
         ws.current = socket;
+
+        // 1. Wait for the connection to open
+        socket.onopen = () => {
+            // If React unmounted this component while the socket was connecting
+            // close it immediately now that it's safe to do seo.
+            if (!isMounted) {
+                socket.close();
+            }
+        }
 
         socket.onmessage = (e) => {
             try {
@@ -30,7 +41,14 @@ export function WebSocketProvider({ token, children }: { token: string | null; c
             } catch {}
         };
 
-        return () => socket.close();
+        return () => {
+            isMounted = false;
+
+            // 2. Only close synchronously if the connection is already fully established
+            if (socket.readyState === WebSocket.OPEN) {
+                socket.close();
+            }
+        };
     }, [token]);
 
     const send = useCallback((payload: unknown) => {
