@@ -14,8 +14,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 @Component
 @Profile("seed")
@@ -31,45 +33,45 @@ public class Seeder implements CommandLineRunner {
     private static final int USER_COUNT = 100;
 
     private static final String[] FIRST_NAMES = {
-        "Alice", "Bob", "Charlie", "Diana", "Emma", "Frank", "Grace", "Henry",
-        "Isla", "Jack", "Kate", "Liam", "Mia", "Noah", "Olivia", "Paul",
-        "Quinn", "Rachel", "Sam", "Tina", "Uma", "Victor", "Wendy", "Xander",
-        "Yara", "Zoe", "Adam", "Beth", "Carl", "Dora"
+            "Alice", "Bob", "Charlie", "Diana", "Emma", "Frank", "Grace", "Henry",
+            "Isla", "Jack", "Kate", "Liam", "Mia", "Noah", "Olivia", "Paul",
+            "Quinn", "Rachel", "Sam", "Tina", "Uma", "Victor", "Wendy", "Xander",
+            "Yara", "Zoe", "Adam", "Beth", "Carl", "Dora"
     };
 
     private static final String[] LAST_NAMES = {
-        "Smith", "Jones", "Williams", "Brown", "Taylor", "Davies", "Wilson",
-        "Evans", "Thomas", "Roberts", "Johnson", "Walker", "Wright", "Robinson",
-        "Thompson", "White", "Hughes", "Edwards", "Green", "Hall"
+            "Smith", "Jones", "Williams", "Brown", "Taylor", "Davies", "Wilson",
+            "Evans", "Thomas", "Roberts", "Johnson", "Walker", "Wright", "Robinson",
+            "Thompson", "White", "Hughes", "Edwards", "Green", "Hall"
     };
 
     private static final String[] DOMAINS = {
-        "gmail.com", "yahoo.com", "hotmail.com", "outlook.com", "mail.com"
+            "gmail.com", "yahoo.com", "hotmail.com", "outlook.com", "mail.com"
     };
 
     private static final String[] GENDERS = { "male", "female", "non-binary" };
 
     private static final String[] MUSIC_GENRES = {
-        "rock", "pop", "jazz", "classical", "hip-hop", "electronic", "country", "r&b"
+            "rock", "pop", "jazz", "classical", "hip-hop", "electronic", "country", "r&b"
     };
 
     private static final String[] LOOKING_FOR = {
-        "friendship", "romance", "adventure", "professional"
+            "friendship", "romance", "adventure", "professional"
     };
 
     private static final String[] ACTIVITY_LEVELS = { "low", "moderate", "high" };
 
     private static final String[] INTEREST_OPTIONS = {
-        "reading", "gaming", "hiking", "cooking", "traveling", "sports",
-        "photography", "art", "music", "movies", "fitness", "coding",
-        "dancing", "yoga", "cycling", "gardening", "writing", "crafts"
+            "reading", "gaming", "hiking", "cooking", "traveling", "sports",
+            "photography", "art", "music", "movies", "fitness", "coding",
+            "dancing", "yoga", "cycling", "gardening", "writing", "crafts"
     };
 
     private static final String[][] LOCATIONS = {
-        {"Tallinn", "Estonia"}, {"Tartu", "Estonia"}, {"Narva", "Estonia"},
-        {"Helsinki", "Finland"}, {"Riga", "Latvia"}, {"Vilnius", "Lithuania"},
-        {"Stockholm", "Sweden"}, {"Berlin", "Germany"}, {"London", "UK"},
-        {"Amsterdam", "Netherlands"}
+            { "Tallinn", "Estonia" }, { "Tartu", "Estonia" }, { "Narva", "Estonia" },
+            { "Helsinki", "Finland" }, { "Riga", "Latvia" }, { "Vilnius", "Lithuania" },
+            { "Stockholm", "Sweden" }, { "Berlin", "Germany" }, { "London", "UK" },
+            { "Amsterdam", "Netherlands" }
     };
 
     @Override
@@ -83,14 +85,24 @@ public class Seeder implements CommandLineRunner {
         String hashedPassword = passwordEncoder.encode("password123");
 
         // Seed locations
-        List<Location> locations = new ArrayList<>();
-        for (String[] loc : LOCATIONS) {
-            Location l = new Location();
-            l.setCity(loc[0]);
-            l.setCountry(loc[1]);
-            locations.add(l);
+        // Prevent duplicate locations on table wipes
+        List<Location> locations;
+        if (locationRepository.count() == 0) {
+            locations = new ArrayList<>();
+            for (String[] loc : LOCATIONS) {
+                Location l = new Location();
+                l.setCity(loc[0]);
+                l.setCountry(loc[1]);
+                locations.add(l);
+            }
+            locations = locationRepository.saveAll(locations);
+        } else {
+            locations = locationRepository.findAll();
         }
-        locationRepository.saveAll(locations);
+
+        // Batch collections for better performance
+        List<com.matchme.user.Profile> profilesToSave = new ArrayList<>();
+        List<Interest> interestsToSave = new ArrayList<>();
 
         // Seed users + profiles + interests
         for (int i = 0; i < USER_COUNT; i++) {
@@ -102,7 +114,7 @@ public class Seeder implements CommandLineRunner {
             User user = new User();
             user.setEmail(email);
             user.setPasswordHash(hashedPassword);
-            userRepository.save(user);
+            user = userRepository.save(user); // Saving individually to guarantee ID generation for relationships
 
             Location loc = locations.get(rng.nextInt(locations.size()));
 
@@ -116,22 +128,26 @@ public class Seeder implements CommandLineRunner {
             profile.setLookingFor(LOOKING_FOR[rng.nextInt(LOOKING_FOR.length)]);
             profile.setActivityLevel(ACTIVITY_LEVELS[rng.nextInt(ACTIVITY_LEVELS.length)]);
             profile.setLocationId(loc.getId());
-            profileRepository.save(profile);
+            profilesToSave.add(profile);
 
             // 2-4 random interests per user
+            // Use a Set and while-loop to guarantee exact interest count
             int interestCount = 2 + rng.nextInt(3);
-            List<String> chosen = new ArrayList<>();
-            for (int j = 0; j < interestCount; j++) {
+            Set<String> chosen = new HashSet<>();
+            while (chosen.size() < interestCount) {
                 String interest = INTEREST_OPTIONS[rng.nextInt(INTEREST_OPTIONS.length)];
-                if (!chosen.contains(interest)) {
-                    chosen.add(interest);
+                if (chosen.add(interest)) {
                     Interest it = new Interest();
                     it.setUser(user);
                     it.setInterest(interest);
-                    interestRepository.save(it);
+                    interestsToSave.add(it);
                 }
             }
         }
+
+        // Flush batches to the database
+        profileRepository.saveAll(profilesToSave);
+        interestRepository.saveAll(interestsToSave);
 
         System.out.println("Seeded " + USER_COUNT + " users with profiles. Password for all: password123");
     }
