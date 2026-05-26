@@ -12,6 +12,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -75,6 +76,7 @@ public class Seeder implements CommandLineRunner {
     };
 
     @Override
+    @Transactional
     public void run(String... args) {
         if (userRepository.count() > 0) {
             System.out.println("Database already has users, skipping seed.");
