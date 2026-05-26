@@ -19,28 +19,17 @@
   padding: 0 1rem;
 }
 
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
 .navbar-logo {
   color: #f8fafc;
   font-size: 1.5rem;
   font-weight: 700;
   text-decoration: none;
-}
-
-.navbar-links {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-}
-
-.navbar-links a {
-  color: #cbd5e1;
-  text-decoration: none;
-  font-weight: 500;
-  transition: color 0.2s ease;
-}
-
-.navbar-links a:hover {
-  color: #f8fafc;
 }
 
 .logout-btn {
@@ -58,13 +47,15 @@
   background-color: #dc2626;
 }
 
+/* --- Hamburger Menu Icon (Always Visible) --- */
 .menu-toggle {
-  display: none;
+  display: flex;
   flex-direction: column;
   gap: 5px;
   background: transparent;
   border: none;
   cursor: pointer;
+  padding: 0;
 }
 
 .menu-toggle .bar {
@@ -74,62 +65,66 @@
   transition: all 0.3s ease;
 }
 
-@media (max-width: 768px) {
-  .menu-toggle {
-    display: flex;
-  }
-
-  .navbar-links {
-    position: absolute;
-    top: 60px;
-    left: -100%;
-    flex-direction: column;
-    background-color: #1e293b;
-    width: 100%;
-    text-align: center;
-    gap: 0;
-    transition: 0.3s ease;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-  }
-
-  .navbar-links.active {
-    left: 0;
-  }
-
-  .navbar-links a {
-    padding: 1.2rem 0;
-    width: 100%;
-    border-bottom: 1px solid #334155;
-  }
-
-  .logout-btn {
-    margin: 1.2rem 0;
-    width: 80%;
-  }
-  
-  .menu-toggle .bar.open:nth-child(1) {
-    transform: translateY(8px) rotate(45deg);
-  }
-  .menu-toggle .bar.open:nth-child(2) {
-    opacity: 0;
-  }
-  .menu-toggle .bar.open:nth-child(3) {
-    transform: translateY(-8px) rotate(-45deg);
-  }
+.menu-toggle .bar.open:nth-child(1) {
+  transform: translateY(8px) rotate(45deg);
 }
+.menu-toggle .bar.open:nth-child(2) {
+  opacity: 0;
+}
+.menu-toggle .bar.open:nth-child(3) {
+  transform: translateY(-8px) rotate(-45deg);
+}
+
+/* --- Slide-out Navigation Links (Hidden by default) --- */
+.navbar-links {
+  position: absolute;
+  top: 60px;
+  left: -300px; /* Hidden off-screen to the left */
+  display: flex;
+  flex-direction: column;
+  background-color: #1e293b;
+  width: 250px;
+  height: calc(100vh - 60px);
+  text-align: left;
+  gap: 0;
+  transition: left 0.3s ease;
+  box-shadow: 4px 4px 6px rgba(0,0,0,0.1);
+}
+
+.navbar-links.active {
+  left: 0; /* Slides into view when active */
+}
+
+.navbar-links a {
+  color: #cbd5e1;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 1.2rem 1.5rem;
+  width: 100%;
+  border-bottom: 1px solid #334155;
+  box-sizing: border-box;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.navbar-links a:hover {
+  color: #f8fafc;
+  background-color: #334155;
+}
+
+/* --- Badge styling --- */
 .nav-chat-link {
   position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .nav-badge {
-  position: absolute;
-  top: -8px;
-  right: -10px;
   background: #ef4444;
   color: #fff;
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   font-weight: 700;
   border-radius: 999px;
-  padding: 1px 5px;
+  padding: 2px 8px;
   pointer-events: none;
 }
