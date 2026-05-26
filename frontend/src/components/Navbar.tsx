@@ -42,9 +42,15 @@ export const Navbar = () => {
                 </button>
 
                 <div className={`navbar-links ${isMenuOpen ? "active" : ""}`}>
+                    <Link to="/recommendations" className="nav-link" onClick={() => setIsMenuOpen(false)}>
+                        Discover
+                    </Link>
                     <Link to="/" className="nav-chat-link" onClick={() => setIsMenuOpen(false)}>
                         Chats
                         {unread > 0 && <span className="nav-badge">{unread}</span>}
+                    </Link>
+                    <Link to="/profile" className="nav-link" onClick={() => setIsMenuOpen(false)}>
+                        Profile
                     </Link>
                     <button className="logout-btn" onClick={logout}>Logout</button>
                 </div>

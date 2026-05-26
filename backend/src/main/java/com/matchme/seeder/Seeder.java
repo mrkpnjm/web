@@ -1,5 +1,7 @@
 package com.matchme.seeder;
 
+import org.springframework.transaction.annotation.Transactional;
+
 import com.matchme.user.Interest;
 import com.matchme.user.InterestRepository;
 import com.matchme.user.Location;
@@ -75,6 +77,7 @@ public class Seeder implements CommandLineRunner {
     };
 
     @Override
+    @Transactional
     public void run(String... args) {
         if (userRepository.count() > 0) {
             System.out.println("Database already has users, skipping seed.");

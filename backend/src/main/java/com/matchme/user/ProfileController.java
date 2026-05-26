@@ -14,12 +14,17 @@ import java.util.UUID;
 public class ProfileController {
 
     private final ProfileRepository profileRepository;
+    private final UserRepository userRepository; // Added to fetch the attached user
 
     @PutMapping("/me/profile")
     public ResponseEntity<Profile> updateMyProfile(@AuthenticationPrincipal User me, @RequestBody Profile updatedData) {
         Profile profile = profileRepository.findById(me.getId()).orElse(new Profile());
 
-        profile.setUser(me);
+        // Fetch the attached user from the database to avoid the detached entity error
+        User attachedUser = userRepository.findById(me.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        profile.setUser(attachedUser); 
         profile.setDisplayName(updatedData.getDisplayName());
         profile.setBio(updatedData.getBio());
         profile.setAvatarUrl(updatedData.getAvatarUrl());
