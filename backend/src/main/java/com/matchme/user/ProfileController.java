@@ -61,13 +61,11 @@ public class ProfileController {
     public ResponseEntity<Profile> getUserProfile(@AuthenticationPrincipal User me, @PathVariable UUID id) {
         // Check if request is made by someone else
         if (!me.getId().equals(id)) {
-            boolean isConnected = connectionRepository.findConnectionBetweenUsers(me.getId(), id)
-                    .filter(c -> c.getStatus() == ConnectionStatus.ACCEPTED)
-                    .isPresent();
+            var connection = connectionRepository.findConnectionBetweenUsers(me.getId(), id);
             
-            // 404 if not connected
-            if (!isConnected) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unauthorized: Users are not connected");
+            // If a connection exists but was DECLINED, block access (404)
+            if (connection.isPresent() && connection.get().getStatus() == ConnectionStatus.DECLINED) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unauthorized: Profile unavailable");
             }
         }
 
@@ -80,12 +78,10 @@ public class ProfileController {
     @GetMapping("/users/{id}/bio")
     public ResponseEntity<Map<String, String>> getUserBio(@AuthenticationPrincipal User me, @PathVariable UUID id) {
         if (!me.getId().equals(id)) {
-            boolean isConnected = connectionRepository.findConnectionBetweenUsers(me.getId(), id)
-                    .filter(c -> c.getStatus() == ConnectionStatus.ACCEPTED)
-                    .isPresent();
+            var connection = connectionRepository.findConnectionBetweenUsers(me.getId(), id);
             
-            if (!isConnected) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unauthorized: Users are not connected");
+            if (connection.isPresent() && connection.get().getStatus() == ConnectionStatus.DECLINED) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unauthorized: Profile unavailable");
             }
         }
 
