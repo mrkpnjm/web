@@ -1,5 +1,6 @@
 package com.matchme.connection;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -13,6 +14,16 @@ public class ConnectionService {
 
     public ConnectionService(ConnectionRepository connectionRepository) {
         this.connectionRepository = connectionRepository;
+    }
+
+    @Transactional(readOnly = true)
+    public List<Connection> getActiveConnections(UUID userID) {
+        return connectionRepository.findActiveConnections(userID);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Connection> getPendingRequests(UUID userId) {
+        return connectionRepository.findByReceiverIdAndStatus(userId, ConnectionStatus.PENDING);
     }
 
     @Transactional

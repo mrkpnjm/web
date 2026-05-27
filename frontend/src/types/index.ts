@@ -19,3 +19,13 @@ export interface Chat {
     last_at: string;
     unread_count: number;
 }
+
+export type ConnectionStatus = 'PENDING' | 'ACCEPTED' | 'DECLINED';
+
+export interface Connection {
+    id: string;
+    sender_id: string;
+    receiver_id: string;
+    status: ConnectionStatus;
+    created_at: string;
+}
