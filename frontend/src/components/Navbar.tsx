@@ -77,9 +77,15 @@ export const Navbar = () => {
 
         {/* Slide-out Menu (Hidden by default) */}
         <div className={`navbar-links ${isMenuOpen ? "active" : ""}`}>
-          <Link to="/" className="nav-chat-link">
+          <Link to="/recommendations" className="nav-link" onClick={() => setIsMenuOpen(false)}>
+              Discover
+          </Link>
+          <Link to="/" className="nav-chat-link" onClick={() => setIsMenuOpen(false)}>
             Chats
             {unread > 0 && <span className="nav-badge">{unread}</span>}
+          </Link>
+          <Link to="/profile" className="nav-link" onClick={() => setIsMenuOpen(false)}>
+              Profile
           </Link>
           {/* Add future routes here (e.g., Profile, Settings) */}
           
