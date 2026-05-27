@@ -1,5 +1,6 @@
 package com.matchme.connection;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,4 +19,13 @@ public interface ConnectionRepository extends JpaRepository<Connection, UUID> {
         "(c.senderId = :userA AND c.receiverId = :userB) OR " +
         "(c.senderId = :userB AND c.receiverId = :userA)")
     Optional<Connection> findConnectionBetweenUsers(@Param("userA") UUID userA, @Param("userB") UUID userB);
+
+    // Find active connections where the user is either the sender or receiver
+    @Query("SELECT c FROM Connection c WHERE " +
+        "c.status = 'ACCEPTED' AND " +
+        "(c.senderId = :userId OR c.receiverId = :userId)")
+    List<Connection> findActiveConnections(@Param("userId") UUID userId);
+
+    // Find incoming pending requests specifically waiting for this user to accept
+    List<Connection> findByReceiverAndStatus(UUID receiverId, ConnectionStatus status);
 }
