@@ -17,6 +17,10 @@ async function request(path: string, options: RequestInit = {}) {
         const err = await res.json().catch(() => ({ error: res.statusText }));
         throw new Error(err.error || res.statusText);
     }
+
+    // FIX: Prevents a JSON parsing crash on 204 No Content responses (like DELETE requests)
+    if (res.status === 204) return null;
+
     return res.json();
 }
 
@@ -62,8 +66,25 @@ export const api = {
     dismissRecommendation: (id: string) =>
         request(`/recommendations/${id}/dismiss`, { method: "POST" }),
 
-    sendConnectionRequest: (senderId: string, receiverId: string) =>
-        request(`/connections/request?senderId=${senderId}&receiverId=${receiverId}`, { method: "POST" }),
+    // --- Secure Connection Endpoints ---
+
+    getActiveConnections: () =>
+        request("connections/active"),
+    
+    getPendingRequests: () =>
+        request("/connections/pending"),
+
+    sendConnectionRequest: (targetUserId: string) =>
+        request(`/connections/request?targetUserId=${targetUserId}`, { method: "POST" }),
+
+    acceptConnectionRequest: (requesterId: string) =>
+        request(`/connections/accept?requesterId=${requesterId}`, { method: "POST" }),
+
+    dismissConnectionRequest: (requesterId: string) =>
+        request(`/connections/dismiss?requesterId=${requesterId}`, {method: "POST" }),
+
+    removeConnection: (connectedUserId: string) =>
+        request(`/connections/remove?connectedUserId=${connectedUserId}`, { method: "DELETE" }),
     
     getLocations: () => request("/locations"),
 };
