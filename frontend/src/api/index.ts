@@ -69,13 +69,13 @@ export const api = {
     // --- Secure Connection Endpoints ---
 
     getActiveConnections: () =>
-        request("connections/active"),
+        request("/connections/active"),
     
     getPendingRequests: () =>
         request("/connections/pending"),
 
-    sendConnectionRequest: (targetUserId: string) =>
-        request(`/connections/request?targetUserId=${targetUserId}`, { method: "POST" }),
+    sendConnectionRequest: (receiverId: string) =>
+        request(`/connections/request?receiverId=${receiverId}`, { method: "POST" }),
 
     acceptConnectionRequest: (requesterId: string) =>
         request(`/connections/accept?requesterId=${requesterId}`, { method: "POST" }),
