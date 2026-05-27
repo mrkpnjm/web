@@ -103,7 +103,12 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     private void send(UUID userId, Object payload) throws Exception {
         WebSocketSession session = sessions.get(userId);
         if (session != null && session.isOpen()) {
-            session.sendMessage(new TextMessage(objectMapper.writeValueAsString(payload)));
+            // Lock the session so only one thread can send a message to this user at a time
+            synchronized (session) {
+                if (session.isOpen()) { // Double-check it's still open inside the lock
+                    session.sendMessage(new TextMessage(objectMapper.writeValueAsString(payload)));
+                }
+            }
         }
     }
 
@@ -111,7 +116,12 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         try {
             String json = objectMapper.writeValueAsString(payload);
             for (WebSocketSession s : sessions.values()) {
-                if (s.isOpen()) s.sendMessage(new TextMessage(json));
+                // Lock each individual session as we broadcast to it
+                synchronized (s) {
+                    if (s.isOpen()) {
+                        s.sendMessage(new TextMessage(json));
+                    }
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
