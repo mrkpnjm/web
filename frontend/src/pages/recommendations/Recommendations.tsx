@@ -86,9 +86,10 @@ export default function Recommendations() {
     };
 
     const handleConnect = async (receiverId: string) => {
-        if (!myId) return;
+        // We still ensure the user is loaded, but we only pass receiverId to the API
+        if (!myId) return; 
         try {
-            await api.sendConnectionRequest(myId, receiverId);
+            await api.sendConnectionRequest(receiverId);
             setRecommendations(prev => prev.filter(p => p.id !== receiverId));
         } catch (error) {
             alert(error instanceof Error ? error.message : "Failed to connect");
