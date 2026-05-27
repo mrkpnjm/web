@@ -23,7 +23,7 @@ public class ConnectionService {
 
     @Transactional(readOnly = true)
     public List<Connection> getPendingRequests(UUID userId) {
-        return connectionRepository.findByReceiverAndStatus(userId, ConnectionStatus.PENDING);
+        return connectionRepository.findByReceiverIdAndStatus(userId, ConnectionStatus.PENDING);
     }
 
     @Transactional

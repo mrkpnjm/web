@@ -27,5 +27,5 @@ public interface ConnectionRepository extends JpaRepository<Connection, UUID> {
     List<Connection> findActiveConnections(@Param("userId") UUID userId);
 
     // Find incoming pending requests specifically waiting for this user to accept
-    List<Connection> findByReceiverAndStatus(UUID receiverId, ConnectionStatus status);
+    List<Connection> findByReceiverIdAndStatus(UUID receiverId, ConnectionStatus status);
 }
