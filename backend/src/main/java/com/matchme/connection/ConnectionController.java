@@ -1,5 +1,6 @@
 package com.matchme.connection;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,18 @@ public class ConnectionController {
 
     public ConnectionController(ConnectionService connectionService) {
         this.connectionService = connectionService;
+    }
+
+    @GetMapping("/active")
+    public ResponseEntity<List<Connection>> getActiveConnections(
+        @AuthenticationPrincipal User loggedInUser) {
+            return ResponseEntity.ok(connectionService.getActiveConnections(loggedInUser.getId()));
+    }
+
+    @GetMapping("/pending")
+    public ResponseEntity<List<Connection>> getPendingRequests(
+        @AuthenticationPrincipal User loggedInUser) {
+            return ResponseEntity.ok(connectionService.getPendingRequests(loggedInUser.getId()));
     }
 
     @PostMapping("/request")
