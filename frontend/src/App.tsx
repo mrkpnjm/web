@@ -13,8 +13,7 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-    const { isLoggedIn } = useAuth();
-    const token = localStorage.getItem("token");
+    const { isLoggedIn, token } = useAuth(); // Now pulling token from global context
 
     return (
         <BrowserRouter>
