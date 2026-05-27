@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { useWS } from "../context/WebSocketContext";
 import "./Navbar.css";
@@ -8,6 +8,7 @@ export const Navbar = () => {
   const { logout } = useAuth();
   const { subscribe } = useWS();
   const location = useLocation();
+  const navigate = useNavigate(); // Initialize navigate
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const [unread, setUnread] = useState(0);
 
@@ -21,7 +22,7 @@ export const Navbar = () => {
     } catch (error) {
       console.log("Failed to log out", error);
     } finally {
-      window.location.href = "/login";
+      navigate("/login");
     }
   };
 
