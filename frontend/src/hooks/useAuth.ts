@@ -1,26 +1,12 @@
-import { useState } from "react";
-import { api } from "../api";
+import { useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
 
 export function useAuth() {
-    const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
+    const context = useContext(AuthContext);
 
-    async function login(email: string, password: string) {
-        const data = await api.login(email, password);
-        localStorage.setItem("token", data.token);
-        setToken(data.token);
+    if (context === undefined) {
+        throw new Error('useAuth must be used withinf an AuthProvider');
     }
 
-    async function register(email: string, password: string) {
-        const data = await api.register(email, password);
-        localStorage.setItem("token", data.token);
-        setToken(data.token);
-    }
-
-    async function logout() {
-        await api.logout();
-        localStorage.removeItem("token");
-        setToken(null);
-    }
-
-    return { token, isLoggedIn: !!token, login, register, logout };
+    return context;
 }
