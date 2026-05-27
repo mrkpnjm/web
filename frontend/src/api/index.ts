@@ -58,4 +58,12 @@ export const api = {
         
     getRecommendations: () =>
         request("/recommendations"),
+
+    dismissRecommendation: (id: string) =>
+        request(`/recommendations/${id}/dismiss`, { method: "POST" }),
+
+    sendConnectionRequest: (senderId: string, receiverId: string) =>
+        request(`/connections/request?senderId=${senderId}&receiverId=${receiverId}`, { method: "POST" }),
+    
+    getLocations: () => request("/locations"),
 };

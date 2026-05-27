@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "profiles")
@@ -18,6 +19,7 @@ public class Profile {
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId 
     @JoinColumn(name = "id")
+    @JsonIgnore
     private User user;
 
     @Column(name = "display_name", nullable = false)
