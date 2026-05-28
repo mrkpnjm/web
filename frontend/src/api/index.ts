@@ -69,7 +69,7 @@ export const api = {
     // --- Secure Connection Endpoints ---
 
     getActiveConnections: () =>
-        request("connections/active"),
+        request("/connections/active"),
     
     getPendingRequests: () =>
         request("/connections/pending"),
