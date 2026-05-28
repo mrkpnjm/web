@@ -24,17 +24,12 @@ export default function Recommendations() {
     const [recommendations, setRecommendations] = useState<DetailedProfile[]>([]);
     const [locations, setLocations] = useState<Location[]>([]); // New state for dynamic locations
     const [loading, setLoading] = useState(true);
-    const [myId, setMyId] = useState<string | null>(null);
 
     useEffect(() => {
         const init = async () => {
             try {
                 // Fetch user and locations in parallel
-                const [user, locs] = await Promise.all([
-                    api.getMe(),
-                    api.getLocations()
-                ]);
-                setMyId(user.id);
+                const locs = await api.getLocations()
                 setLocations(locs);
                 await loadRecommendations();
             } catch (err) {
@@ -69,10 +64,10 @@ export default function Recommendations() {
                             bio: userProfile.bio,
                             age: userProfile.age,
                             gender: userProfile.gender,
-                            musicGenre: userProfile.musicGenre,
-                            activityLevel: userProfile.activityLevel,
-                            locationId: userProfile.locationId?.toString() || "0",
-                            lookingFor: userProfile.lookingFor || "Not specified"
+                            musicGenre: userProfile.music_genre,
+                            activityLevel: userProfile.activity_level,
+                            locationId: userProfile.location_id?.toString() || "0",
+                            lookingFor: userProfile.looking_for || "Not specified"
                         };
                     } catch (err) {
                         return null;
@@ -86,9 +81,8 @@ export default function Recommendations() {
     };
 
     const handleConnect = async (receiverId: string) => {
-        if (!myId) return;
         try {
-            await api.sendConnectionRequest(myId, receiverId);
+            await api.sendConnectionRequest(receiverId);
             setRecommendations(prev => prev.filter(p => p.id !== receiverId));
         } catch (error) {
             alert(error instanceof Error ? error.message : "Failed to connect");
