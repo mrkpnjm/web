@@ -14,8 +14,8 @@ async function request(path: string, options: RequestInit = {}) {
         },
     });
     if (!res.ok) {
-        const err = await res.json().catch(() => ({ error: res.statusText }));
-        throw new Error(err.error || res.statusText);
+        const err = await res.json().catch(() => ({ error: `HTTP ${res.statusText}` }));
+        throw new Error(err.error || `HTTP ${res.statusText}`);
     }
 
     // FIX: Prevents a JSON parsing crash on 204 No Content responses (like DELETE requests)
@@ -75,7 +75,7 @@ export const api = {
         request("/connections/pending"),
 
     sendConnectionRequest: (targetUserId: string) =>
-        request(`/connections/request?targetUserId=${targetUserId}`, { method: "POST" }),
+        request(`/connections/request?receiverId=${targetUserId}`, { method: "POST" }),
 
     acceptConnectionRequest: (requesterId: string) =>
         request(`/connections/accept?requesterId=${requesterId}`, { method: "POST" }),
