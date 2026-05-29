@@ -55,15 +55,15 @@ export default function MyProfile() {
                 
                 if (profileData) {
                     const loadedProfile: ProfileData = {
-                        displayName: profileData.displayName || "",
+                        displayName: profileData.display_name || "",
                         bio: profileData.bio || "",
-                        avatarUrl: profileData.avatarUrl || "",
+                        avatarUrl: profileData.avatar_url || "",
                         age: profileData.age ? profileData.age.toString() : "",
                         gender: profileData.gender || "male",
-                        musicGenre: profileData.musicGenre || "rock",
-                        lookingFor: profileData.lookingFor || "friendship",
-                        activityLevel: profileData.activityLevel || "moderate",
-                        locationId: profileData.locationId ? profileData.locationId.toString() : "1"
+                        musicGenre: profileData.music_genre || "rock",
+                        lookingFor: profileData.looking_for || "friendship",
+                        activityLevel: profileData.activity_level || "moderate",
+                        locationId: profileData.location_id ? profileData.location_id.toString() : "1"
                     };
                     setProfile(loadedProfile);
                     setFormData(loadedProfile);
@@ -101,8 +101,14 @@ export default function MyProfile() {
         
         try {
             await api.updateMyProfile({
-                ...formData,
+                display_name: formData.displayName,
+                bio: formData.bio,
+                avatar_url: formData.avatarUrl,
                 age: formData.age ? parseInt(formData.age) : null,
+                gender: formData.gender,
+                music_genre: formData.musicGenre,
+                looking_for: formData.lookingFor,
+                activity_level: formData.activityLevel,
                 locationId: formData.locationId ? parseInt(formData.locationId) : null
             });
             setProfile({ ...formData });

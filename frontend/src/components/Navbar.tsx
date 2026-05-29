@@ -80,6 +80,9 @@ export const Navbar = () => {
           <Link to="/recommendations" className="nav-link" onClick={() => setIsMenuOpen(false)}>
               Discover
           </Link>
+          <Link to="/connections" className="nav-link" onClick={() => setIsMenuOpen(false)}>
+            Connections
+          </Link>
           <Link to="/" className="nav-chat-link" onClick={() => setIsMenuOpen(false)}>
             Chats
             {unread > 0 && <span className="nav-badge">{unread}</span>}

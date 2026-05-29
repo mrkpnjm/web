@@ -14,8 +14,8 @@ async function request(path: string, options: RequestInit = {}) {
         },
     });
     if (!res.ok) {
-        const err = await res.json().catch(() => ({ error: res.statusText }));
-        throw new Error(err.error || res.statusText);
+        const err = await res.json().catch(() => ({ error: `HTTP ${res.statusText}` }));
+        throw new Error(err.error || `HTTP ${res.statusText}`);
     }
 
     // FIX: Prevents a JSON parsing crash on 204 No Content responses (like DELETE requests)

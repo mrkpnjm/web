@@ -8,6 +8,7 @@ import ChatList from "./pages/chat/ChatList";
 import ChatView from "./pages/chat/ChatView";
 import Recommendations from "./pages/recommendations/Recommendations";
 import MyProfile from "./pages/profile/MyProfile";
+import { ConnectionsPage } from "./pages/connections/ConnectionsPage";
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
     const { isLoggedIn } = useAuth();
@@ -27,6 +28,7 @@ export default function App() {
                     <Route element={<PrivateRoute><MainLayout /></PrivateRoute>}>
                         <Route path="/" element={<ChatList />} />
                         <Route path="/chat/:userId" element={<ChatView />} />
+                        <Route path="/connections" element={<ConnectionsPage />} />
                         <Route path="/recommendations" element={<Recommendations />} />
                         <Route path="/profile" element={<MyProfile />} />
                     </Route>
