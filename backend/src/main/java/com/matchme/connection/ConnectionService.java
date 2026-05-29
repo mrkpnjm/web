@@ -17,13 +17,17 @@ public class ConnectionService {
     }
 
     @Transactional(readOnly = true)
-    public List<Connection> getActiveConnections(UUID userID) {
-        return connectionRepository.findActiveConnections(userID);
+    public List<UUID> getActiveConnections(UUID userId) {
+        return connectionRepository.findActiveConnections(userId).stream()
+            .map(c -> c.getSenderId().equals(userId) ? c.getReceiverId() : c.getSenderId())
+            .toList();
     }
 
     @Transactional(readOnly = true)
-    public List<Connection> getPendingRequests(UUID userId) {
-        return connectionRepository.findByReceiverIdAndStatus(userId, ConnectionStatus.PENDING);
+    public List<UUID> getPendingRequests(UUID userId) {
+        return connectionRepository.findByReceiverIdAndStatus(userId, ConnectionStatus.PENDING).stream()
+            .map(Connection::getSenderId)
+            .toList();
     }
 
     @Transactional

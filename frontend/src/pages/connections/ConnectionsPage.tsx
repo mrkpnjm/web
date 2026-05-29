@@ -1,11 +1,9 @@
 import { useEffect, useState, useCallback } from "react";
-import { Connection } from "../../types";
 import { api } from "../../api";
 
 export function ConnectionsPage() {
-  const [activeConnections, setActiveConnections] = useState<Connection[]>([]);
-  const [pendingRequests, setPendingRequests] = useState<Connection[]>([]);
-  const [myId, setMyId] = useState<string | null>("");
+  const [activeConnections, setActiveConnections] = useState<string[]>([]);
+  const [pendingRequests, setPendingRequests] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>("");
   const [userNames, setUserNames] = useState<Record<string, string>>({});
@@ -16,24 +14,15 @@ export function ConnectionsPage() {
       setLoading(true);
       setError(null);
 
-      const [me, active, pending] = await Promise.all([
-        api.getMe(),
+      const [active, pending] = await Promise.all([
         api.getActiveConnections(),
         api.getPendingRequests(),
       ]);
 
-      setMyId(me.id);
       setActiveConnections(active);
       setPendingRequests(pending);
 
-      const allIds = [
-        active.map((c: Connection) =>
-          c.sender_id === me.id ? c.receiver_id : c.sender_id,
-        ),
-        pending.map((c: Connection) => c.sender_id),
-      ];
-
-      const uniqueIds = [...new Set(allIds.flat())];
+      const uniqueIds = [...new Set([...active, ...pending])] as string[];
 
       const nameEntries = await Promise.all(
         uniqueIds.map(async (id: string) => {
@@ -68,9 +57,7 @@ export function ConnectionsPage() {
   const handleDismiss = async (requesterId: string) => {
     try {
       await api.dismissConnectionRequest(requesterId);
-      setPendingRequests((prev) =>
-        prev.filter((r) => r.sender_id != requesterId),
-      );
+      setPendingRequests((prev) => prev.filter((id) => id !== requesterId));
     } catch (err: unknown) {
       if (err instanceof Error) setError(err.message);
       else setError("Failed to dismiss request");
@@ -80,12 +67,7 @@ export function ConnectionsPage() {
   const handleRemove = async (connectedUserId: string) => {
     try {
       await api.removeConnection(connectedUserId);
-      setActiveConnections((prev) =>
-        prev.filter(
-          (c) =>
-            c.sender_id != connectedUserId && c.receiver_id != connectedUserId,
-        ),
-      );
+      setActiveConnections((prev) => prev.filter((id) => id !== connectedUserId));
     } catch (err: unknown) {
       if (err instanceof Error) setError(err.message);
       else setError("Failed to remove connection");
@@ -168,12 +150,10 @@ export function ConnectionsPage() {
           </p>
         ) : (
           <div className="d-flex flex-column gap-3">
-            {activeConnections.map((conn) => {
-              const otherId =
-                conn.sender_id === myId ? conn.receiver_id : conn.sender_id;
+            {activeConnections.map((otherId) => {
               const name = userNames[otherId] ?? otherId;
               return (
-                <div key={conn.id} className="card">
+                <div key={otherId} className="card">
                   <div className="card-body d-flex align-items-center gap-3">
                     <div
                       className="rounded-circle bg-primary bg-opacity-25 text-primary fw-semibold d-flex align-items-center justify-content-center flex-shrink-0"
@@ -183,10 +163,6 @@ export function ConnectionsPage() {
                     </div>
                     <div className="flex-grow-1">
                       <p className="mb-0 fw-medium">{name}</p>
-                      <p className="mb-0 text-muted small">
-                        Connected since{" "}
-                        {new Date(conn.created_at).toLocaleDateString()}
-                      </p>
                     </div>
                     <div className="d-flex gap-2 flex-shrink-0">
                       <a
@@ -214,12 +190,10 @@ export function ConnectionsPage() {
           <p className="text-muted">No pending requests</p>
         ) : (
           <div className="d-flex flex-column gap-3">
-            {pendingRequests.map((req) => {
-              const otherId =
-                req.receiver_id === myId ? req.sender_id : req.receiver_id;
-              const name = userNames[otherId] ?? otherId;
+            {pendingRequests.map((senderId) => {
+              const name = userNames[senderId] ?? senderId;
               return (
-                <div key={req.sender_id} className="card border-warning">
+                <div key={senderId} className="card border-warning">
                   <div className="card-body d-flex align-items-center gap-3">
                     <div
                       className="rounded-circle bg-warning bg-opacity-25 text-warning fw-semibold d-flex align-items-center justify-content-center flex-shrink-0"
@@ -234,20 +208,17 @@ export function ConnectionsPage() {
                           Pending
                         </span>
                       </p>
-                      <p className="mb-0 text-muted small">
-                        Sent {new Date(req.created_at).toLocaleDateString()}
-                      </p>
                     </div>
                     <div className="d-flex gap-2 flex-shrink-0">
                       <button
                         className="btn btn-success btn-sm"
-                        onClick={() => handleAccept(req.sender_id)}
+                        onClick={() => handleAccept(senderId)}
                       >
                         Accept
                       </button>
                       <button
                         className="btn btn-outline-secondary btn-sm"
-                        onClick={() => handleDismiss(req.sender_id)}
+                        onClick={() => handleDismiss(senderId)}
                       >
                         Decline
                       </button>

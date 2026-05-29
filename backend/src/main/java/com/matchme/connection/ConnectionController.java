@@ -20,13 +20,13 @@ public class ConnectionController {
     }
 
     @GetMapping("/active")
-    public ResponseEntity<List<Connection>> getActiveConnections(
+    public ResponseEntity<List<UUID>> getActiveConnections(
         @AuthenticationPrincipal User loggedInUser) {
             return ResponseEntity.ok(connectionService.getActiveConnections(loggedInUser.getId()));
     }
 
     @GetMapping("/pending")
-    public ResponseEntity<List<Connection>> getPendingRequests(
+    public ResponseEntity<List<UUID>> getPendingRequests(
         @AuthenticationPrincipal User loggedInUser) {
             return ResponseEntity.ok(connectionService.getPendingRequests(loggedInUser.getId()));
     }
