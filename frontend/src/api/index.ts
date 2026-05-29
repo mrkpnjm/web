@@ -1,5 +1,17 @@
 const BASE = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
+interface ProfileUpdatePayload {
+    display_name: string;
+    bio: string;
+    avatar_url: string;
+    age: number | null;
+    gender: string;
+    music_genre: string;
+    looking_for: string;
+    activity_level: string;
+    locationId: number | null;
+}
+
 function getToken() {
     return localStorage.getItem("token");
 }
@@ -54,7 +66,7 @@ export const api = {
     getMyProfile: () =>
         request("/me/profile"),
 
-    updateMyProfile: (profileData: any) =>
+    updateMyProfile: (profileData: ProfileUpdatePayload) =>
         request("/me/profile", { method: "PUT", body: JSON.stringify(profileData) }),
 
     getProfile: (id: string) =>
