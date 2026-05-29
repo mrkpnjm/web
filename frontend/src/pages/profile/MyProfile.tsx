@@ -115,8 +115,9 @@ export default function MyProfile() {
             });
             setProfile({ ...formData });
             setIsEditing(false);
-        } catch (err) {
-            setMessage({ text: "Failed to update profile. Check your connection.", type: "error" });
+        } catch (err: unknown) {
+            if (err instanceof Error) { setMessage({ text: err.message, type: 'error'})}
+            else { setMessage({ text: "Failed to update profile. Check your connection.", type: "error" })};
         } finally {
             setIsSaving(false);
         }
