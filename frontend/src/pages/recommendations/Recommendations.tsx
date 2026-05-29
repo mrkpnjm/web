@@ -70,7 +70,8 @@ export default function Recommendations() {
                             locationId: userProfile.location_id?.toString() || "0",
                             lookingFor: userProfile.looking_for || "Not specified"
                         };
-                    } catch (err) {
+                    } catch (err: unknown) {
+                        console.error("Failed to load profile for id", id, err);
                         return null;
                     }
                 })
