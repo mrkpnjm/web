@@ -63,7 +63,7 @@ export default function MyProfile() {
                         musicGenre: profileData.music_genre || "rock",
                         lookingFor: profileData.looking_for || "friendship",
                         activityLevel: profileData.activity_level || "moderate",
-                        locationId: profileData.location_id ? profileData.locationId.toString() : "1"
+                        locationId: profileData.location_id ? profileData.location_id.toString() : "1"
                     };
                     setProfile(loadedProfile);
                     setFormData(loadedProfile);

@@ -22,16 +22,14 @@ interface Location {
 
 export default function Recommendations() {
     const [recommendations, setRecommendations] = useState<DetailedProfile[]>([]);
-    const [locations, setLocations] = useState<Location[]>([]); // New state for dynamic locations
+    const [locations, setLocations] = useState<Location[]>([]); 
     const [loading, setLoading] = useState(true);
-    const [myId, setMyId] = useState<string | null>(null);
 
     useEffect(() => {
         const init = async () => {
             try {
-                // Fetch user and locations in parallel
-                const [user,locs] = await api.getLocations()
-                setMyId(user.id);
+                // Fetch locations directly, no need for getMe() anymore
+                const locs = await api.getLocations();
                 setLocations(locs);
                 await loadRecommendations();
             } catch (err) {
@@ -66,6 +64,7 @@ export default function Recommendations() {
                             bio: userProfile.bio,
                             age: userProfile.age,
                             gender: userProfile.gender,
+                            // Properly mapped from backend snake_case
                             musicGenre: userProfile.music_genre,
                             activityLevel: userProfile.activity_level,
                             locationId: userProfile.location_id?.toString() || "0",
@@ -83,8 +82,6 @@ export default function Recommendations() {
     };
 
     const handleConnect = async (receiverId: string) => {
-        // We still ensure the user is loaded, but we only pass receiverId to the API
-        if (!myId) return; 
         try {
             await api.sendConnectionRequest(receiverId);
             setRecommendations(prev => prev.filter(p => p.id !== receiverId));
