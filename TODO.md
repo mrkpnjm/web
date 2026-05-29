@@ -1,1 +1,0 @@
-* "The connections endpoint only returns a list of ids." Right now, Connections backend returns ```List<Connection>``` (that is Entities) not ```List<String>``` (that is id-s). Check, if you can copy logic from **Recommendation** backend
