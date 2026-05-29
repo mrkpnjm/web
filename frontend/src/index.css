@@ -11,3 +11,17 @@
   --bs-link-color: #a78bfa;
   --bs-link-hover-color: #c4b5fd;
 }
+
+.navbar a {
+  color: #8892a4;
+  text-decoration: none
+}
+
+.navbar a:hover {
+  color: #e2e8f0;
+}
+
+.navbar a.active-link {
+  color: #ffffff;
+  font-weight: 600;
+}
