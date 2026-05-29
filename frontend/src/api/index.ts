@@ -49,16 +49,22 @@ export const api = {
     getMe: () =>
         request("/me"),
     
-    // --- Profile & Recommendation Endpoints ---
+    // --- Profile, Bio & Recommendation Endpoints ---
     
     getMyProfile: () =>
         request("/me/profile"),
+
+    getMyBio: () => 
+        request("/me/bio"),
 
     updateMyProfile: (profileData: any) =>
         request("/me/profile", { method: "PUT", body: JSON.stringify(profileData) }),
 
     getProfile: (id: string) =>
         request(`/users/${id}/profile`),
+
+    getUserBio: (id: string) => 
+        request(`/users/${id}/bio`),
         
     getRecommendations: () =>
         request("/recommendations"),

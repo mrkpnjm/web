@@ -9,6 +9,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -43,50 +44,67 @@ public class ProfileController {
     }
 
     @GetMapping("/me/profile")
-    public ResponseEntity<Profile> getMyProfile(@AuthenticationPrincipal User me) {
+    public ResponseEntity<Map<String, Object>> getMyProfile(@AuthenticationPrincipal User me) {
         Profile profile = profileRepository.findById(me.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile not setup yet"));
-        return ResponseEntity.ok(profile);
-    }
-
-    // Endpoint for my bio
-    @GetMapping("/me/bio")
-    public ResponseEntity<Map<String, String>> getMyBio(@AuthenticationPrincipal User me) {
-        Profile profile = profileRepository.findById(me.getId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile not setup yet"));
-        return ResponseEntity.ok(Map.of("bio", profile.getBio() != null ? profile.getBio() : ""));
+        
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("id", profile.getId());
+        response.put("display_name", profile.getDisplayName());
+        response.put("avatar_url", profile.getAvatarUrl());
+        response.put("about_me", profile.getBio());
+        
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/users/{id}/profile")
-    public ResponseEntity<Profile> getUserProfile(@AuthenticationPrincipal User me, @PathVariable UUID id) {
-        // Check if request is made by someone else
-        if (!me.getId().equals(id)) {
-            var connection = connectionRepository.findConnectionBetweenUsers(me.getId(), id);
-            
-            // If a connection exists but was DECLINED, block access (404)
-            if (connection.isPresent() && connection.get().getStatus() == ConnectionStatus.DECLINED) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unauthorized: Profile unavailable");
-            }
-        }
-
+    public ResponseEntity<Map<String, Object>> getUserProfile(@AuthenticationPrincipal User me, @PathVariable UUID id) {
+        checkAccess(me.getId(), id);
         Profile profile = profileRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile not found"));
-        return ResponseEntity.ok(profile);
+                
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("id", profile.getId());
+        response.put("display_name", profile.getDisplayName());
+        response.put("avatar_url", profile.getAvatarUrl());
+        response.put("about_me", profile.getBio()); 
+        
+        return ResponseEntity.ok(response);
     }
 
-    // Bio endpoint
+    @GetMapping("/me/bio")
+    public ResponseEntity<Map<String, Object>> getMyBio(@AuthenticationPrincipal User me) {
+        Profile profile = profileRepository.findById(me.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile not setup yet"));
+        return ResponseEntity.ok(mapBioData(profile));
+    }
+
     @GetMapping("/users/{id}/bio")
-    public ResponseEntity<Map<String, String>> getUserBio(@AuthenticationPrincipal User me, @PathVariable UUID id) {
-        if (!me.getId().equals(id)) {
-            var connection = connectionRepository.findConnectionBetweenUsers(me.getId(), id);
-            
+    public ResponseEntity<Map<String, Object>> getUserBio(@AuthenticationPrincipal User me, @PathVariable UUID id) {
+        checkAccess(me.getId(), id);
+        Profile profile = profileRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile not found"));
+        return ResponseEntity.ok(mapBioData(profile));
+    }
+
+    private void checkAccess(UUID myId, UUID targetId) {
+        if (!myId.equals(targetId)) {
+            var connection = connectionRepository.findConnectionBetweenUsers(myId, targetId);
             if (connection.isPresent() && connection.get().getStatus() == ConnectionStatus.DECLINED) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unauthorized: Profile unavailable");
             }
         }
+    }
 
-        Profile profile = profileRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile not found"));
-        return ResponseEntity.ok(Map.of("bio", profile.getBio() != null ? profile.getBio() : ""));
+    private Map<String, Object> mapBioData(Profile profile) {
+        Map<String, Object> bioData = new LinkedHashMap<>();
+        bioData.put("id", profile.getId());
+        bioData.put("location_id", profile.getLocationId());
+        bioData.put("age", profile.getAge());
+        bioData.put("gender", profile.getGender());
+        bioData.put("music_genre", profile.getMusicGenre());
+        bioData.put("looking_for", profile.getLookingFor());
+        bioData.put("activity_level", profile.getActivityLevel());
+        return bioData;
     }
 }

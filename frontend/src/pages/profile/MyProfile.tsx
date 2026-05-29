@@ -45,25 +45,27 @@ export default function MyProfile() {
         const init = async () => {
             setLoading(true);
             try {
-                // Fetch both profile and the master location list
-                const [profileData, locs] = await Promise.all([
+                // Fetch profile (about me), bio (stats), and the master location list
+                const [profileData, bioData, locs] = await Promise.all([
                     api.getMyProfile().catch(() => null),
+                    api.getMyBio().catch(() => null),
                     api.getLocations()
                 ]);
                 
                 setLocations(locs);
                 
-                if (profileData) {
+                if (profileData || bioData) {
                     const loadedProfile: ProfileData = {
-                        displayName: profileData.display_name || "",
-                        bio: profileData.bio || "",
-                        avatarUrl: profileData.avatar_url || "",
-                        age: profileData.age ? profileData.age.toString() : "",
-                        gender: profileData.gender || "male",
-                        musicGenre: profileData.music_genre || "rock",
-                        lookingFor: profileData.looking_for || "friendship",
-                        activityLevel: profileData.activity_level || "moderate",
-                        locationId: profileData.location_id ? profileData.location_id.toString() : "1"
+                        displayName: profileData?.display_name || "",
+                        // Mapped from the new exact rubric split
+                        bio: profileData?.about_me || "",
+                        avatarUrl: profileData?.avatar_url || "",
+                        age: bioData?.age ? bioData.age.toString() : "",
+                        gender: bioData?.gender || "male",
+                        musicGenre: bioData?.music_genre || "rock",
+                        lookingFor: bioData?.looking_for || "friendship",
+                        activityLevel: bioData?.activity_level || "moderate",
+                        locationId: bioData?.location_id ? bioData.location_id.toString() : "1"
                     };
                     setProfile(loadedProfile);
                     setFormData(loadedProfile);
@@ -109,7 +111,7 @@ export default function MyProfile() {
                 music_genre: formData.musicGenre,
                 looking_for: formData.lookingFor,
                 activity_level: formData.activityLevel,
-                locationId: formData.locationId ? parseInt(formData.locationId) : null
+                location_id: formData.locationId ? parseInt(formData.locationId) : null
             });
             setProfile({ ...formData });
             setIsEditing(false);

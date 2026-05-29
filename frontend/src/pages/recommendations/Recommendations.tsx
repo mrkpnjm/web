@@ -53,25 +53,26 @@ export default function Recommendations() {
             const details = await Promise.all(
                 ids.map(async (id) => {
                     try {
-                        const [userBase, userProfile] = await Promise.all([
+                        //Fetch base user, profile (about me) and bio 
+                        const [userBase, userProfile, userBio] = await Promise.all([
                             api.getUser(id),
-                            api.getProfile(id)
+                            api.getProfile(id),
+                            api.getUserBio(id) 
                         ]);
                         return {
                             id: id,
                             name: userBase.name,
-                            avatar_url: userBase.profile_picture,
-                            bio: userProfile.bio,
-                            age: userProfile.age,
-                            gender: userProfile.gender,
-                            // Properly mapped from backend snake_case
-                            musicGenre: userProfile.music_genre,
-                            activityLevel: userProfile.activity_level,
-                            locationId: userProfile.location_id?.toString() || "0",
-                            lookingFor: userProfile.looking_for || "Not specified"
+                            avatar_url: userProfile.avatar_url || userBase.profile_picture,
+                            bio: userProfile.about_me, 
+                            age: userBio.age,
+                            gender: userBio.gender,
+                            musicGenre: userBio.music_genre,
+                            activityLevel: userBio.activity_level,
+                            locationId: userBio.location_id?.toString() || "0",
+                            lookingFor: userBio.looking_for || "Not specified"
                         };
                     } catch (err: unknown) {
-                        console.error("Failed to load profile for id", id, err);
+                        console.error("Failed to load profile/bio for id", id, err);
                         return null;
                     }
                 })
