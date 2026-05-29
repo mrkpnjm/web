@@ -24,12 +24,14 @@ export default function Recommendations() {
     const [recommendations, setRecommendations] = useState<DetailedProfile[]>([]);
     const [locations, setLocations] = useState<Location[]>([]); // New state for dynamic locations
     const [loading, setLoading] = useState(true);
+    const [myId, setMyId] = useState<string | null>(null);
 
     useEffect(() => {
         const init = async () => {
             try {
                 // Fetch user and locations in parallel
-                const locs = await api.getLocations()
+                const [user,locs] = await api.getLocations()
+                setMyId(user.id);
                 setLocations(locs);
                 await loadRecommendations();
             } catch (err) {
@@ -81,6 +83,8 @@ export default function Recommendations() {
     };
 
     const handleConnect = async (receiverId: string) => {
+        // We still ensure the user is loaded, but we only pass receiverId to the API
+        if (!myId) return; 
         try {
             await api.sendConnectionRequest(receiverId);
             setRecommendations(prev => prev.filter(p => p.id !== receiverId));

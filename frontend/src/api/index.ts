@@ -74,8 +74,8 @@ export const api = {
     getPendingRequests: () =>
         request("/connections/pending"),
 
-    sendConnectionRequest: (targetUserId: string) =>
-        request(`/connections/request?receiverId=${targetUserId}`, { method: "POST" }),
+    sendConnectionRequest: (receiverId: string) =>
+        request(`/connections/request?receiverId=${receiverId}`, { method: "POST" }),
 
     acceptConnectionRequest: (requesterId: string) =>
         request(`/connections/accept?requesterId=${requesterId}`, { method: "POST" }),
