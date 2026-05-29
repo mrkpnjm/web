@@ -81,7 +81,7 @@ export const api = {
         request(`/connections/accept?requesterId=${requesterId}`, { method: "POST" }),
 
     dismissConnectionRequest: (requesterId: string) =>
-        request(`/connections/dismiss?requesterId=${requesterId}`, {method: "POST" }),
+        request(`/connections/dismiss?requesterId=${requesterId}`, { method: "PUT" }),
 
     removeConnection: (connectedUserId: string) =>
         request(`/connections/remove?connectedUserId=${connectedUserId}`, { method: "DELETE" }),
