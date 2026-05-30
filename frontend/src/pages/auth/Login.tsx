@@ -6,12 +6,24 @@ export default function Login() {
     const { login } = useAuth();
     const navigate = useNavigate();
     const [email, setEmail] = useState("");
+    const [emailError, setEmailError] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 
+    function validate(): boolean {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            setEmailError("Please enter a valid email address");
+            return false;
+        }
+        setEmailError("");
+        return true;
+    }
+
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
+        if (!validate()) return;
         setError("");
         setLoading(true);
         try {
@@ -32,13 +44,14 @@ export default function Login() {
                     <form onSubmit={handleSubmit}>
                         <label className="form-label">Email</label>
                         <input
-                            className="form-control mb-3"
+                            className="form-control mb-1"
                             type="email"
                             value={email}
                             onChange={e => setEmail(e.target.value)}
                             required
                             autoFocus
                         />
+                        {emailError&& <p className="text-danger small mb-2">{emailError}</p>}
                         <label className="form-label">Password</label>
                         <input
                             className="form-control mb-3"
