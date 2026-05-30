@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { api } from "../../api";
 
 interface DetailedProfile {
@@ -22,15 +23,22 @@ interface Location {
 
 export default function Recommendations() {
     const [recommendations, setRecommendations] = useState<DetailedProfile[]>([]);
-    const [locations, setLocations] = useState<Location[]>([]); 
+    const [locations, setLocations] = useState<Location[]>([]);
+    const [profileIncomplete, setProfileIncomplete] = useState(false);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const init = async () => {
             try {
-                // Fetch locations directly, no need for getMe() anymore
-                const locs = await api.getLocations();
+                const [locs, bio] = await Promise.all([
+                    api.getLocations(),
+                    api.getMyBio().catch(() => null),
+                ]);
                 setLocations(locs);
+                if (!bio || !bio.location_id || !bio.looking_for) {
+                    setProfileIncomplete(true);
+                    return;
+                }
                 await loadRecommendations();
             } catch (err) {
                 console.error("Initialization failed", err);
@@ -112,25 +120,41 @@ export default function Recommendations() {
 
     if (loading) return <div className="container py-4 text-muted">Loading recommendations...</div>;
 
+    if (profileIncomplete) return (
+        <div className="container py-4">
+            <h2 className="mb-4">Discover Connections</h2>
+            <div className="alert alert-warning">
+                <strong>Your profile is incomplete.</strong> You need to set your location and what you're looking for before we can find matches.{" "}
+                <Link to="/profile" className="alert-link">Complete your profile →</Link>
+            </div>
+        </div>
+    );
+
     return (
         <div className="container py-4">
             <h2 className="mb-4">Discover Connections</h2>
             {recommendations.length === 0 ? (
-                <p className="text-muted">No recommendations available. Complete your profile or change preferences.</p>
+                <p className="text-muted">No recommendations available right now. Try changing your preferences.</p>
             ) : (
                 <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
                     {recommendations.map((rec) => (
                         <div key={rec.id} className="col">
                             <div className="card h-100">
-                                <div className="card-img-top d-flex align-items-center justify-content-center bg-body-secondary" style={{ height: '200px' }}>
-                                    {rec.avatar_url ? (
-                                        <img src={rec.avatar_url} alt={rec.name} className="w-100 h-100" style={{ objectFit: 'cover' }} />
-                                    ) : (
-                                        <div className="display-4 text-muted">{getInitials(rec.name)}</div>
-                                    )}
-                                </div>
+                                <Link to={`/profile/${rec.id}`} className="text-decoration-none">
+                                    <div className="card-img-top d-flex align-items-center justify-content-center bg-body-secondary" style={{ height: '200px' }}>
+                                        {rec.avatar_url ? (
+                                            <img src={rec.avatar_url} alt={rec.name} className="w-100 h-100" style={{ objectFit: 'cover' }} />
+                                        ) : (
+                                            <div className="display-4 text-muted">{getInitials(rec.name)}</div>
+                                        )}
+                                    </div>
+                                </Link>
                                 <div className="card-body d-flex flex-column">
-                                    <h5 className="card-title fw-semibold mb-1">{rec.name}, <span className="fw-normal text-muted">{rec.age}</span></h5>
+                                    <h5 className="card-title fw-semibold mb-1">
+                                        <Link to={`/profile/${rec.id}`} className="text-decoration-none text-body">
+                                            {rec.name}, <span className="fw-normal text-muted">{rec.age}</span>
+                                        </Link>
+                                    </h5>
                                     <p className="card-text text-muted small flex-grow-1 mb-3">"{rec.bio}"</p>
                                     <div className="d-flex flex-wrap gap-1 mb-3">
                                         <span className="badge rounded-pill border text-muted small" style={{ backgroundColor: 'transparent' }}><i className="bi bi-geo-alt me-1"></i> {getCityName(rec.locationId)}</span>

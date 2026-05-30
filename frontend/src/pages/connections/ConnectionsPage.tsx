@@ -170,10 +170,10 @@ export function ConnectionsPage() {
                       <p className="mb-0 fw-medium">{profile.name}</p>
                     </div>
                     <div className="d-flex gap-2 flex-shrink-0">
-                      <a
-                        href={`/chat/${otherId}`}
-                        className="btn btn-outline-secondary"
-                      >
+                      <a href={`/profile/${otherId}`} className="btn btn-outline-secondary">
+                        Profile
+                      </a>
+                      <a href={`/chat/${otherId}`} className="btn btn-outline-secondary">
                         Message
                       </a>
                       <button

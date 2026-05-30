@@ -8,6 +8,7 @@ import ChatList from "./pages/chat/ChatList";
 import ChatView from "./pages/chat/ChatView";
 import Recommendations from "./pages/recommendations/Recommendations";
 import MyProfile from "./pages/profile/MyProfile";
+import UserProfilePage from "./pages/profile/UserProfilePage";
 import { ConnectionsPage } from "./pages/connections/ConnectionsPage";
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
@@ -31,6 +32,7 @@ export default function App() {
                         <Route path="/connections" element={<ConnectionsPage />} />
                         <Route path="/recommendations" element={<Recommendations />} />
                         <Route path="/profile" element={<MyProfile />} />
+                        <Route path="/profile/:id" element={<UserProfilePage />} />
                     </Route>
                     <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
