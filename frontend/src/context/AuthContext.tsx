@@ -28,7 +28,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         localStorage.setItem('token', data.token);
         setToken(data.token);
         const me = await api.getMe();
-        setUserId(me);
+        setUserId(me.id);
     }
 
     async function register(email:string, password: string) {
@@ -36,7 +36,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         localStorage.setItem('token', data.token);
         setToken(data.token);
         const me = await api.getMe();
-        setUserId(me);
+        setUserId(me.id);
     }
 
     async function logout() {
