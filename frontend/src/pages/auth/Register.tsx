@@ -28,7 +28,7 @@ export default function Register() {
         <div className="min-vh-100 d-flex align-items-center justify-content-center bg-body">
             <div className="card p-4 p-md-5" style={{ width: '100%', maxWidth: '400px' }}>
                 <div className="card-body">
-                    <h1>Create account</h1>
+                    <h4 className="mb-4">Create account</h4>
                         <form onSubmit={handleSubmit}>
                             <label className="form-label">Email</label>
                             <input
