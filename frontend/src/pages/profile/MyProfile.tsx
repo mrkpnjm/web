@@ -84,6 +84,10 @@ export default function MyProfile() {
         return loc ? `${loc.city} (${loc.country})` : "Location not set";
     };
 
+    const capitalize = (str: string):string => {
+        return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
     const handleEditClick = () => {
         setFormData(profile || defaultProfile);
         setMessage({ text: "", type: "" });
@@ -123,95 +127,114 @@ export default function MyProfile() {
         }
     };
 
-    if (loading) return <div className="page">Loading profile...</div>;
+    if (loading) return <div className="container py-4 text-muted">Loading profile...</div>;
 
     return (
-        <div className="page profile-page">
-            <div className="profile-card">
+        <div className="container py-4">
+            <div className="card p-4 mx-auto" style={{ maxWidth: '640px' }}>
                 
                 {!isEditing ? (
-                    <div className="profile-overview">
-                        <div className="profile-header">
-                            <div className="profile-avatar-large">
+                    <div className="d-flex flex-column gap-4">
+                        <div className="d-flex align-items-center gap-4 pb-4 border-bottom">
+                            <div
+                                className="rounded-circle bg-body-secondary border d-flex align-items-center justify-content-center flex-shrink-0 fw-bold text-muted"
+                                style={{ width: 100, height: 100, fontSize: '2rem' }}
+                            >
                                 {profile?.avatarUrl ? (
-                                    <img src={profile.avatarUrl} alt="Avatar" />
+                                    <img className="rounded-circle" style={{ width: '100%', height: '100%', objectFit: 'cover' }} src={profile.avatarUrl} alt="Avatar" />
                                 ) : (
-                                    <div className="avatar-placeholder">?</div>
+                                    <span>?</span>
                                 )}
                             </div>
-                            <div className="profile-title">
-                                <h2>{profile?.displayName || "Profile Incomplete"}</h2>
-                                <p className="profile-subtitle">
+                            <div className="flex-grow-1">
+                                <h4 className="mb-1">{profile?.displayName || "Profile Incomplete"}</h4>
+                                <p className="text-muted small mb-0">
                                     {profile ? `${profile.age} years old • ${getCityName(profile.locationId)}` : "Complete your profile to be discovered!"}
                                 </p>
                             </div>
-                            <button className="btn-secondary edit-btn" onClick={handleEditClick}>
+                            <button className="btn btn-outline-secondary ms-auto" onClick={handleEditClick}>
                                 ⚙️ {profile ? "Edit Profile" : "Set up Profile"}
                             </button>
                         </div>
 
                         {profile && (
-                            <div className="profile-body">
-                                <div className="info-group">
-                                    <h3>About Me</h3>
-                                    <p className="bio-text">{profile.bio || "No bio added yet."}</p>
+                            <div className="d-flex flex-column gap-3">
+                                <div>
+                                    <p className="text-muted small text-uppercase mb-2" style={{ letterSpacing: '0.5px' }}>About Me</p>
+                                    <p className="p-3 rounded bg-body-secondary border text-muted">{profile.bio || "No bio added yet."}</p>
                                 </div>
 
-                                <div className="info-grid">
-                                    <div className="info-item">
-                                        <span className="info-label">Gender</span>
-                                        <span className="info-value">{profile.gender}</span>
+                                <div className="row g-3">
+                                    <div className="col-6">
+                                        <div className="p-3 rounded bg-body-secondary border h-100">
+                                            <span className="text-muted d-block mb-1" style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Gender</span>
+                                            <span className="fw-semibold">{capitalize(profile.gender)}</span>
+                                        </div>
                                     </div>
-                                    <div className="info-item">
-                                        <span className="info-label">Looking For</span>
-                                        <span className="info-value">{profile.lookingFor}</span>
+                                    <div className="col-6">
+                                        <div className="p-3 rounded bg-body-secondary border h-100">
+                                            <span className="text-muted d-block mb-1" style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Looking For</span>
+                                            <span className="fw-semibold">{capitalize(profile.lookingFor)}</span>
+                                        </div>
                                     </div>
-                                    <div className="info-item">
-                                        <span className="info-label">Music</span>
-                                        <span className="info-value">🎵 {profile.musicGenre}</span>
+                                    <div className="col-6">
+                                        <div className="p-3 rounded bg-body-secondary border h-100">
+                                            <span className="text-muted d-block mb-1" style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Music</span>
+                                            <span className="fw-semibold">🎵 {capitalize(profile.musicGenre)}</span>
+                                        </div>
                                     </div>
-                                    <div className="info-item">
-                                        <span className="info-label">Activity</span>
-                                        <span className="info-value">⚡ {profile.activityLevel}</span>
+                                    <div className="col-6">
+                                        <div className="p-3 rounded bg-body-secondary border h-100">
+                                            <span className="text-muted d-block mb-1" style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Activity</span>
+                                            <span className="fw-semibold">⚡ {capitalize(profile.activityLevel)}</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         )}
                     </div>
                 ) : (
-                    <div className="profile-edit-mode">
-                        <div className="edit-header">
-                            <h2>Profile Settings</h2>
-                            <button className="btn-secondary" onClick={handleCancelClick} disabled={isSaving}>Cancel</button>
+                    <div className="d-flex flex-column gap-3">
+                        <div className="d-flex justify-content-between align-items-center">
+                            <h4 className="mb-0">Profile Settings</h4>
+                            <button className="btn btn-outline-secondary" onClick={handleCancelClick} disabled={isSaving}>Cancel</button>
                         </div>
 
-                        {message.text && <div className={`form-message ${message.type}`}>{message.text}</div>}
+                        {message.text && <div className={`alert ${message.type === 'error' ? 'alert-danger' : 'alert-success'}`}>{message.text}</div>}
                         
-                        <form onSubmit={handleSubmit} className="profile-form">
-                            <label>Display Name</label>
-                            <input name="displayName" value={formData.displayName} onChange={handleChange} required />
+                        <form onSubmit={handleSubmit} className="d-flex flex-column gap-3">
+                            <div className="mb-0">
+                                <label className="form-label text-muted mb-1">Display Name</label>
+                                <input className="form-control" name="displayName" value={formData.displayName} onChange={handleChange} required />
+                            </div>
 
-                            <label>Age</label>
-                            <input type="number" name="age" value={formData.age} onChange={handleChange} min="18" max="120" required />
+                            <div className="mb-0">
+                                <label className="form-label text-muted mb-1">Age</label>
+                                <input className="form-control" type="number" name="age" value={formData.age} onChange={handleChange} min="18" max="120" required />
+                            </div>
 
-                            <label>Bio</label>
-                            <textarea name="bio" value={formData.bio} onChange={handleChange} rows={4} />
+                            <div className="mb-0">
+                                <label className="form-label text-muted mb-1">Bio</label>
+                                <textarea className="form-control" name="bio" value={formData.bio} onChange={handleChange} rows={4} />
+                            </div>
 
-                            <label>Avatar URL</label>
-                            <input name="avatarUrl" value={formData.avatarUrl} onChange={handleChange} placeholder="https://example.com/pic.jpg" />
+                            <div className="mb-0">
+                                <label className="form-label text-muted mb-1">Avatar URL</label>
+                                <input className="form-control" name="avatarUrl" value={formData.avatarUrl} onChange={handleChange} placeholder="https://example.com/pic.jpg" />
+                            </div>
 
-                            <div className="form-row">
-                                <div className="form-group">
+                            <div className="row g-3">
+                                <div className="col-md-6 d-flex flex-column">
                                     <label>Gender</label>
-                                    <select name="gender" value={formData.gender} onChange={handleChange}>
+                                    <select className="form-select" name="gender" value={formData.gender} onChange={handleChange}>
                                         <option value="male">Male</option>
                                         <option value="female">Female</option>
                                         <option value="non-binary">Non-Binary</option>
                                     </select>
                                 </div>
-                                <div className="form-group">
+                                <div className="col-md-6 d-flex flex-column">
                                     <label>Music</label>
-                                    <select name="musicGenre" value={formData.musicGenre} onChange={handleChange}>
+                                    <select className="form-select" name="musicGenre" value={formData.musicGenre} onChange={handleChange}>
                                         <option value="rock">Rock</option>
                                         <option value="pop">Pop</option>
                                         <option value="jazz">Jazz</option>
@@ -221,18 +244,18 @@ export default function MyProfile() {
                                 </div>
                             </div>
 
-                            <div className="form-row">
-                                <div className="form-group">
+                            <div className="row g-3">
+                                <div className="col-md-6 d-flex flex-column">
                                     <label>Looking For</label>
-                                    <select name="lookingFor" value={formData.lookingFor} onChange={handleChange}>
+                                    <select className="form-select" name="lookingFor" value={formData.lookingFor} onChange={handleChange}>
                                         <option value="friendship">Friendship</option>
                                         <option value="romance">Romance</option>
                                         <option value="adventure">Adventure</option>
                                     </select>
                                 </div>
-                                <div className="form-group">
+                                <div className="col-md-6 d-flex flex-column">
                                     <label>Activity Level</label>
-                                    <select name="activityLevel" value={formData.activityLevel} onChange={handleChange}>
+                                    <select className="form-select" name="activityLevel" value={formData.activityLevel} onChange={handleChange}>
                                         <option value="low">Low</option>
                                         <option value="moderate">Moderate</option>
                                         <option value="high">High</option>
@@ -240,16 +263,18 @@ export default function MyProfile() {
                                 </div>
                             </div>
 
-                            <label>City</label>
-                            <select name="locationId" value={formData.locationId} onChange={handleChange}>
-                                {locations.map(loc => (
-                                    <option key={loc.id} value={loc.id}>
-                                        {loc.city} ({loc.country})
-                                    </option>
-                                ))}
-                            </select>
+                            <label className="form-label text-muted mb-1">City</label>
+                            <div className="d-flex flex-column">
+                                <select className="form-select" name="locationId" value={formData.locationId} onChange={handleChange}>
+                                    {locations.map(loc => (
+                                        <option key={loc.id} value={loc.id}>
+                                            {loc.city} ({loc.country})
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
 
-                            <button type="submit" className="btn-primary" disabled={isSaving}>
+                            <button type="submit" className="btn btn-primary w-100 mt-2" disabled={isSaving}>
                                 {isSaving ? "Saving..." : "Save Changes"}
                             </button>
                         </form>

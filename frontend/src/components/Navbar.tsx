@@ -2,19 +2,13 @@ import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { useWS } from "../context/WebSocketContext";
-import "./Navbar.css";
 
 export const Navbar = () => {
   const { logout } = useAuth();
   const { subscribe } = useWS();
   const location = useLocation();
   const navigate = useNavigate(); // Initialize navigate
-  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const [unread, setUnread] = useState(0);
-
-  const toggleMenu = (): void => {
-    setIsMenuOpen(!isMenuOpen);
-  };
 
   const handleLogout = async () => {
     try {
@@ -25,11 +19,6 @@ export const Navbar = () => {
       navigate("/login");
     }
   };
-
-  // Close the hamburger menu automatically when navigating to a new page
-  useEffect(() => {
-    setIsMenuOpen(false);
-  }, [location.pathname]);
 
   // Reset unread count when visiting the chat list
   useEffect(() => {
@@ -47,52 +36,46 @@ export const Navbar = () => {
   }, [subscribe, location.pathname]);
 
   return (
-    <nav className="navbar">
-      <div className="navbar-container">
+    <nav
+      className="navbar fixed-top px-4"
+      style={{backgroundColor: 'var(--bs-navbar-bg)', borderBottom: '1px solid var(--bs-border-color)', height: '60px'}}
+    >
+      <div className="d-flex w-100 align-items-center">
 
-        {/* Left side: Hamburger Icon & Logo */}
-        <div className="navbar-left">
-            <button
-                className="menu-toggle"
-                onClick={toggleMenu}
-                aria-label="Toggle Navigation"
-            >
-                <span className={`bar ${isMenuOpen ? "open" : ""}`}></span>
-                <span className={`bar ${isMenuOpen ? "open" : ""}`}></span>
-                <span className={`bar ${isMenuOpen ? "open" : ""}`}></span>
-            </button>
-            <Link
+        {/* Left side: Logo */}
+        <Link
+          to="/"
+          className="navbar-brand fw-bold me-4"
+          style={{ color: '#a78bfa'}}
+        >match-me</Link>
+
+        {/* Center: Links to pages */}
+        <div className="d-flex gap-1 flex-grow-1">
+          <Link
+            to="/recommendations"
+            className={`px-3 ${location.pathname === '/recommendations' ? 'active-link' : ''}`}
+          >Discover</Link>
+          <Link
             to="/"
-            className="navbar-logo"
-            onClick={() => setIsMenuOpen(false)}
-            >
-            match-me
-            </Link>
+            className={`px-3 position-relative ${location.pathname === '/' ? 'active-link' : ''}`}
+          >
+            Chats
+            {unread > 0 && <span className="badge bg-danger rounded-pill position-absolute top-0 start-100 translate-middle">{unread}</span>}
+          </Link>
+          <Link
+            to="/connections"
+            className={`px-3 ${location.pathname === '/connections' ? 'active-link' : ''}`}
+          >Connections</Link>
+          <Link
+            to="/profile"
+            className={`px-3 ${location.pathname === '/profile' ? 'active-link' : ''}`}
+          >Profile</Link>
         </div>
         
         {/* Right side: Persistent Logout Button */}
-        <button className="logout-btn" onClick={handleLogout}>
+        <button className="btn btn-link text-body-secondary text-decoration-none p-0" onClick={handleLogout}>
             Logout
         </button>
-
-        {/* Slide-out Menu (Hidden by default) */}
-        <div className={`navbar-links ${isMenuOpen ? "active" : ""}`}>
-          <Link to="/recommendations" className="nav-link" onClick={() => setIsMenuOpen(false)}>
-              Discover
-          </Link>
-          <Link to="/connections" className="nav-link" onClick={() => setIsMenuOpen(false)}>
-            Connections
-          </Link>
-          <Link to="/" className="nav-chat-link" onClick={() => setIsMenuOpen(false)}>
-            Chats
-            {unread > 0 && <span className="nav-badge">{unread}</span>}
-          </Link>
-          <Link to="/profile" className="nav-link" onClick={() => setIsMenuOpen(false)}>
-              Profile
-          </Link>
-          {/* Add future routes here (e.g., Profile, Settings) */}
-          
-        </div>
       </div>
     </nav>
   );

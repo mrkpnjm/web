@@ -121,7 +121,7 @@ export function ConnectionsPage() {
           >
             Active
             {activeConnections.length > 0 && (
-              <span className="badge bg-primary ms-2">
+              <span className="badge badge-purple ms-2">
                 {activeConnections.length}
               </span>
             )}
@@ -134,7 +134,7 @@ export function ConnectionsPage() {
           >
             Requests
             {pendingRequests.length > 0 && (
-              <span className="badge bg-warning text-dark ms-2">
+              <span className="badge badge-amber ms-2">
                 {pendingRequests.length}
               </span>
             )}
@@ -167,12 +167,12 @@ export function ConnectionsPage() {
                     <div className="d-flex gap-2 flex-shrink-0">
                       <a
                         href={`/chat/${otherId}`}
-                        className="btn btn-primary btn-sm"
+                        className="btn btn-outline-secondary"
                       >
                         Message
                       </a>
                       <button
-                        className="btn btn-outline-secondary btn-sm"
+                        className="btn btn-outline-secondary"
                         onClick={() => handleRemove(otherId)}
                       >
                         Remove

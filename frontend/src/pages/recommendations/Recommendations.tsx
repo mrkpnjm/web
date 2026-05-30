@@ -47,6 +47,15 @@ export default function Recommendations() {
         return loc ? `${loc.city} (${loc.country})` : "Unknown Location";
     };
 
+    const getInitials = (name: string): string => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
     const loadRecommendations = async () => {
         try {
             const ids: string[] = await api.getRecommendations();
@@ -101,36 +110,38 @@ export default function Recommendations() {
         }
     };
 
-    if (loading) return <div className="page">Loading recommendations...</div>;
+    if (loading) return <div className="container py-4 text-muted">Loading recommendations...</div>;
 
     return (
-        <div className="page recommendations-page">
-            <h2>Discover Connections</h2>
+        <div className="container py-4">
+            <h2 className="mb-4">Discover Connections</h2>
             {recommendations.length === 0 ? (
-                <p className="empty">No recommendations available. Complete your profile or change preferences.</p>
+                <p className="text-muted">No recommendations available. Complete your profile or change preferences.</p>
             ) : (
-                <div className="recommendations-grid">
+                <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
                     {recommendations.map((rec) => (
-                        <div key={rec.id} className="rec-card">
-                            <div className="rec-avatar-container">
-                                {rec.avatar_url ? (
-                                    <img src={rec.avatar_url} alt={rec.name} className="rec-avatar" />
-                                ) : (
-                                    <div className="rec-avatar-placeholder">{rec.name[0]?.toUpperCase()}</div>
-                                )}
-                            </div>
-                            <div className="rec-details">
-                                <h3>{rec.name}, <span className="rec-age">{rec.age}</span></h3>
-                                <p className="rec-bio">"{rec.bio}"</p>
-                                <div className="rec-tags">
-                                    <span className="tag">📍 {getCityName(rec.locationId)}</span>
-                                    <span className="tag">🎯 {rec.lookingFor}</span>
-                                    <span className="tag">🎵 {rec.musicGenre}</span>
-                                    <span className="tag">⚡ {rec.activityLevel}</span>
+                        <div key={rec.id} className="col">
+                            <div className="card h-100">
+                                <div className="card-img-top d-flex align-items-center justify-content-center bg-body-secondary" style={{ height: '200px' }}>
+                                    {rec.avatar_url ? (
+                                        <img src={rec.avatar_url} alt={rec.name} className="w-100 h-100" style={{ objectFit: 'cover' }} />
+                                    ) : (
+                                        <div className="display-4 text-muted">{getInitials(rec.name)}</div>
+                                    )}
                                 </div>
-                                <div className="rec-actions">
-                                    <button className="btn-dismiss" onClick={() => handleDismiss(rec.id)}>Dismiss</button>
-                                    <button className="btn-connect" onClick={() => handleConnect(rec.id)}>Connect</button>
+                                <div className="card-body d-flex flex-column">
+                                    <h5 className="card-title fw-semibold mb-1">{rec.name}, <span className="fw-normal text-muted">{rec.age}</span></h5>
+                                    <p className="card-text text-muted small flex-grow-1 mb-3">"{rec.bio}"</p>
+                                    <div className="d-flex flex-wrap gap-1 mb-3">
+                                        <span className="badge rounded-pill border text-muted small" style={{ backgroundColor: 'transparent' }}>📍 {getCityName(rec.locationId)}</span>
+                                        <span className="badge rounded-pill border text-muted small" style={{ backgroundColor: 'transparent' }}>🎯 {rec.lookingFor}</span>
+                                        <span className="badge rounded-pill border text-muted small" style={{ backgroundColor: 'transparent' }}>🎵 {rec.musicGenre}</span>
+                                        <span className="badge rounded-pill border text-muted small" style={{ backgroundColor: 'transparent' }}>⚡ {rec.activityLevel}</span>
+                                    </div>
+                                    <div className="d-flex gap-2 mt-auto">
+                                        <button className="btn btn-outline-danger flex-fill" onClick={() => handleDismiss(rec.id)}>Dismiss</button>
+                                        <button className="btn btn-outline-success flex-fill" onClick={() => handleConnect(rec.id)}>Connect</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
