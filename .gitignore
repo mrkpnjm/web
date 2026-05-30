@@ -6,5 +6,9 @@ frontend/dist/
 .idea/
 backend/target/
 .vscode/
+backend/.postman/
+backend/postman/
 Connections Page Example.png
 TODO.md
+API-SCHEMA.md
+WORK-FLOW.md
