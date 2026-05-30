@@ -34,7 +34,7 @@ public class UserController {
             Optional<Profile> profile = profileRepository.findById(id);
             Map<String, Object> response = new LinkedHashMap<>();
             response.put("id", u.getId());
-            response.put("name", profile.map(Profile::getDisplayName).orElse(u.getEmail()));
+            response.put("name", profile.map(Profile::getDisplayName).orElse("Unknown"));
             response.put("profile_picture", profile.map(Profile::getAvatarUrl).orElse(null));
             return ResponseEntity.ok(response);
         }).orElse(ResponseEntity.notFound().build());
