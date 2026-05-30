@@ -31,27 +31,27 @@ export default function ChatList() {
     }, [subscribe]);
 
     return (
-        <div className="page">
-            <h2>Messages</h2>
-            {chats.length === 0 && <p className="empty">No conversations yet.</p>}
-            <ul className="chat-list">
+        <div className="container py-4">
+            <h2 className="mb-4">Messages</h2>
+            {chats.length === 0 && <p className="text-muted">No conversations yet.</p>}
+            <div className="d-flex flex-column gap-2">
                 {chats.map(chat => (
-                    <li key={chat.other_id} onClick={() => navigate(`/chat/${chat.other_id}`)}>
-                        <div className="chat-info">
-                            <span className="chat-name">{userNames[chat.other_id] ?? chat.other_id}</span>
-                            <span className="chat-preview">{chat.last_message}</span>
-                        </div>
-                        <div className="chat-meta">
-                            <span className="chat-time">
+                    <div key={chat.other_id} className="card card-body d-flex flex-column gap-1" onClick={() => navigate(`/chat/${chat.other_id}`)} style={{ cursor: 'pointer' }}>
+                        <div className="d-flex justify-content-between align-items-center">
+                            <span className="fw-semibold">{userNames[chat.other_id] ?? chat.other_id}</span>
+                            <span className="text-secondary small">
                                 {new Date(chat.last_at).toLocaleDateString()}
                             </span>
+                        </div>
+                        <div className="d-flex justify-content-between align-items-center">
+                            <span className="text-muted small text-truncate" style={{ maxWidth: '70%' }}>{chat.last_message}</span>
                             {chat.unread_count > 0 && (
-                                <span className="unread-badge">{chat.unread_count}</span>
+                                <span className="badge bg-light text-dark rounded-pill">{chat.unread_count}</span>
                             )}
                         </div>
-                    </li>
+                    </div>
                 ))}
-            </ul>
+            </div>
         </div>
     );
 }
