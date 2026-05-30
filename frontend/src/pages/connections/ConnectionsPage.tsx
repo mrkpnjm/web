@@ -139,7 +139,7 @@ export function ConnectionsPage() {
           >
             Active
             {activeConnections.length > 0 && (
-              <span className="badge bg-primary ms-2">
+              <span className="badge badge-purple ms-2">
                 {activeConnections.length}
               </span>
             )}
@@ -152,7 +152,7 @@ export function ConnectionsPage() {
           >
             Requests
             {pendingRequests.length > 0 && (
-              <span className="badge bg-warning text-dark ms-2">
+              <span className="badge badge-amber ms-2">
                 {pendingRequests.length}
               </span>
             )}
@@ -191,12 +191,12 @@ export function ConnectionsPage() {
                     <div className="d-flex gap-2 flex-shrink-0">
                       <a
                         href={`/chat/${otherId}`}
-                        className="btn btn-primary btn-sm"
+                        className="btn btn-outline-secondary"
                       >
                         Message
                       </a>
                       <button
-                        className="btn btn-outline-secondary btn-sm"
+                        className="btn btn-outline-secondary"
                         onClick={() => handleRemove(otherId)}
                       >
                         Remove
@@ -219,7 +219,7 @@ export function ConnectionsPage() {
                 req.receiver_id === myId ? req.sender_id : req.receiver_id;
               const name = userNames[otherId] ?? otherId;
               return (
-                <div key={req.sender_id} className="card border-warning">
+                <div key={req.sender_id} className="card">
                   <div className="card-body d-flex align-items-center gap-3">
                     <div
                       className="rounded-circle bg-warning bg-opacity-25 text-warning fw-semibold d-flex align-items-center justify-content-center flex-shrink-0"
@@ -240,13 +240,13 @@ export function ConnectionsPage() {
                     </div>
                     <div className="d-flex gap-2 flex-shrink-0">
                       <button
-                        className="btn btn-success btn-sm"
+                        className="btn btn-outline-secondary"
                         onClick={() => handleAccept(req.sender_id)}
                       >
                         Accept
                       </button>
                       <button
-                        className="btn btn-outline-secondary btn-sm"
+                        className="btn btn-outline-secondary"
                         onClick={() => handleDismiss(req.sender_id)}
                       >
                         Decline
