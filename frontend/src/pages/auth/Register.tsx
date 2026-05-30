@@ -8,6 +8,7 @@ export default function Register() {
     const [email, setEmail] = useState("");
     const [emailError, setEmailError] = useState("");
     const [password, setPassword] = useState("");
+    const [passwordError, setPasswordError] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 
@@ -18,6 +19,11 @@ export default function Register() {
             return false;
         }
         setEmailError("");
+        if (password.length < 8) {
+            setPasswordError("Password must be at least 8 characters");
+            return false;
+        }
+        setPasswordError("");
         return true;
     }
 
@@ -51,17 +57,17 @@ export default function Register() {
                                 required
                                 autoFocus
                             />
-                            {emailError&& <p className="text-danger small mb-2">{emailError}</p>}
+                            {emailError && <p className="text-danger small mb-2">{emailError}</p>}
                             <label className="form-label">Password</label>
                             <input
-                                className="form-control mb-3"
+                                className={`form-control mb-1 ${passwordError ? "is-invalid" : ""}`}
                                 type="password"
                                 value={password}
-                                onChange={e => setPassword(e.target.value)}
+                                onChange={e => { setPassword(e.target.value); setPasswordError(""); }}
                                 required
-                                minLength={8}
                             />
-                            {error && <p className="text-danger small">{error}</p>}
+                            {passwordError && <p className="text-danger small mb-2">{passwordError}</p>}
+                            {error && <p className="text-danger small mb-2">{error}</p>}
                             <button className="btn btn-primary w-100 mt-2" type="submit" disabled={loading}>
                                 {loading ? "Creating account..." : "Register"}
                             </button>
