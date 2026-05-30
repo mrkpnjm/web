@@ -75,6 +75,20 @@ public class Seeder implements CommandLineRunner {
             { "Amsterdam", "Netherlands" }
     };
 
+    // City-centre coordinates matching the LOCATIONS array order
+    private static final double[][] COORDINATES = {
+            { 59.4370, 24.7536 }, // Tallinn
+            { 58.3776, 26.7290 }, // Tartu
+            { 59.3797, 28.1791 }, // Narva
+            { 60.1699, 24.9384 }, // Helsinki
+            { 56.9460, 24.1059 }, // Riga
+            { 54.6872, 25.2797 }, // Vilnius
+            { 59.3293, 18.0686 }, // Stockholm
+            { 52.5200, 13.4050 }, // Berlin
+            { 51.5074, -0.1278 }, // London
+            { 52.3676,  4.9041 }  // Amsterdam
+    };
+
     @Override
     @Transactional
     public void run(String... args) {
@@ -118,7 +132,8 @@ public class Seeder implements CommandLineRunner {
             user.setPasswordHash(hashedPassword);
             user = userRepository.save(user); // Saving individually to guarantee ID generation for relationships
 
-            Location loc = locations.get(rng.nextInt(locations.size()));
+            int locIndex = rng.nextInt(locations.size());
+            Location loc = locations.get(locIndex);
 
             com.matchme.user.Profile profile = new com.matchme.user.Profile();
             profile.setUser(user);
@@ -130,6 +145,10 @@ public class Seeder implements CommandLineRunner {
             profile.setLookingFor(LOOKING_FOR[rng.nextInt(LOOKING_FOR.length)]);
             profile.setActivityLevel(ACTIVITY_LEVELS[rng.nextInt(ACTIVITY_LEVELS.length)]);
             profile.setLocationId(loc.getId());
+            // Seed city-centre GPS coordinates so Haversine filtering works out-of-the-box
+            profile.setLatitude(COORDINATES[locIndex][0]);
+            profile.setLongitude(COORDINATES[locIndex][1]);
+            profile.setMaxRadiusKm(50);
             profilesToSave.add(profile);
 
             // 2-4 random interests per user

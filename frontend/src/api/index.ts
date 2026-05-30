@@ -9,8 +9,10 @@ interface ProfileUpdatePayload {
     music_genre: string;
     looking_for: string;
     activity_level: string;
-    // FIX: Changed to snake_case to match the backend and MyProfile.tsx
-    location_id: number | null; 
+    location_id: number | null;
+    latitude: number | null;
+    longitude: number | null;
+    max_radius_km: number | null;
 }
 
 function getToken() {

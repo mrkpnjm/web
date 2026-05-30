@@ -39,7 +39,12 @@ public class ProfileController {
         profile.setMusicGenre(updatedData.getMusicGenre());
         profile.setLookingFor(updatedData.getLookingFor());
         profile.setActivityLevel(updatedData.getActivityLevel());
-        
+        profile.setLatitude(updatedData.getLatitude());
+        profile.setLongitude(updatedData.getLongitude());
+        if (updatedData.getMaxRadiusKm() != null) {
+            profile.setMaxRadiusKm(updatedData.getMaxRadiusKm());
+        }
+
         Profile saved = profileRepository.save(profile);
         return ResponseEntity.ok(saved);
     }
@@ -95,19 +100,27 @@ public class ProfileController {
         if (connection.isPresent()) {
             ConnectionStatus status = connection.get().getStatus();
             if (status == ConnectionStatus.ACCEPTED || status == ConnectionStatus.PENDING) return;
-            // DECLINED: hide with 404 so a bad actor can't distinguish "blocked" from "not found"
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile not found");
         }
 
-        // No connection — allow only if the target is in the caller's recommendation pool
-        // (same country, not dismissed, not already connected)
         Profile myProfile = profileRepository.findById(myId).orElse(null);
-        if (myProfile == null || myProfile.getLocationId() == null) {
+        if (myProfile == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile not found");
         }
-        boolean isCandidate = recommendationRepository
-                .findPotentialCandidates(myId, myProfile.getLocationId())
-                .contains(targetId);
+
+        boolean isCandidate;
+        if (myProfile.getLatitude() != null && myProfile.getLongitude() != null && myProfile.getMaxRadiusKm() != null) {
+            isCandidate = recommendationRepository
+                    .findCandidatesNearby(myId, myProfile.getLatitude(), myProfile.getLongitude(), myProfile.getMaxRadiusKm())
+                    .contains(targetId);
+        } else if (myProfile.getLocationId() != null) {
+            isCandidate = recommendationRepository
+                    .findPotentialCandidates(myId, myProfile.getLocationId())
+                    .contains(targetId);
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile not found");
+        }
+
         if (!isCandidate) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile not found");
         }
@@ -122,6 +135,9 @@ public class ProfileController {
         bioData.put("music_genre", profile.getMusicGenre());
         bioData.put("looking_for", profile.getLookingFor());
         bioData.put("activity_level", profile.getActivityLevel());
+        bioData.put("latitude", profile.getLatitude());
+        bioData.put("longitude", profile.getLongitude());
+        bioData.put("max_radius_km", profile.getMaxRadiusKm());
         return bioData;
     }
 }

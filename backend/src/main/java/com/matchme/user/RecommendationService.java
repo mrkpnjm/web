@@ -38,9 +38,16 @@ public class RecommendationService {
             return List.of();
         }
 
-        // 1. Get location-filtered candidates from DB
-        
-        List<UUID> candidateIds = recommendationRepository.findPotentialCandidates(me.getId(), myProfile.getLocationId());
+        // 1. Get candidates filtered by proximity (Haversine) or city fallback
+        List<UUID> candidateIds;
+        if (myProfile.getLatitude() != null && myProfile.getLongitude() != null && myProfile.getMaxRadiusKm() != null) {
+            candidateIds = recommendationRepository.findCandidatesNearby(
+                    me.getId(), myProfile.getLatitude(), myProfile.getLongitude(), myProfile.getMaxRadiusKm());
+        } else if (myProfile.getLocationId() != null) {
+            candidateIds = recommendationRepository.findPotentialCandidates(me.getId(), myProfile.getLocationId());
+        } else {
+            return List.of();
+        }
 
         // 2. Score, sort, and limit candidates
         return candidateIds.stream()

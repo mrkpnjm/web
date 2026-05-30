@@ -11,6 +11,9 @@ interface ProfileData {
     lookingFor: string;
     activityLevel: string;
     locationId: string;
+    latitude: number | null;
+    longitude: number | null;
+    maxRadiusKm: number;
 }
 
 interface Location {
@@ -28,36 +31,39 @@ const defaultProfile: ProfileData = {
     musicGenre: "rock",
     lookingFor: "friendship",
     activityLevel: "moderate",
-    locationId: "1"
+    locationId: "1",
+    latitude: null,
+    longitude: null,
+    maxRadiusKm: 50,
 };
 
 export default function MyProfile() {
     const [profile, setProfile] = useState<ProfileData | null>(null);
     const [formData, setFormData] = useState<ProfileData>(defaultProfile);
-    const [locations, setLocations] = useState<Location[]>([]); // Dynamic list
-    
+    const [locations, setLocations] = useState<Location[]>([]);
+
     const [isEditing, setIsEditing] = useState(false);
     const [loading, setLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
+    const [geoLoading, setGeoLoading] = useState(false);
+    const [geoError, setGeoError] = useState("");
     const [message, setMessage] = useState({ text: "", type: "" });
 
     useEffect(() => {
         const init = async () => {
             setLoading(true);
             try {
-                // Fetch profile (about me), bio (stats), and the master location list
                 const [profileData, bioData, locs] = await Promise.all([
                     api.getMyProfile().catch(() => null),
                     api.getMyBio().catch(() => null),
                     api.getLocations()
                 ]);
-                
+
                 setLocations(locs);
-                
+
                 if (profileData || bioData) {
                     const loadedProfile: ProfileData = {
                         displayName: profileData?.display_name || "",
-                        // Mapped from the new exact rubric split
                         bio: profileData?.about_me || "",
                         avatarUrl: profileData?.avatar_url || "",
                         age: bioData?.age ? bioData.age.toString() : "",
@@ -65,7 +71,10 @@ export default function MyProfile() {
                         musicGenre: bioData?.music_genre || "rock",
                         lookingFor: bioData?.looking_for || "friendship",
                         activityLevel: bioData?.activity_level || "moderate",
-                        locationId: bioData?.location_id ? bioData.location_id.toString() : "1"
+                        locationId: bioData?.location_id ? bioData.location_id.toString() : "1",
+                        latitude: bioData?.latitude ?? null,
+                        longitude: bioData?.longitude ?? null,
+                        maxRadiusKm: bioData?.max_radius_km ?? 50,
                     };
                     setProfile(loadedProfile);
                     setFormData(loadedProfile);
@@ -84,13 +93,13 @@ export default function MyProfile() {
         return loc ? `${loc.city} (${loc.country})` : "Location not set";
     };
 
-    const capitalize = (str: string):string => {
-        return str.charAt(0).toUpperCase() + str.slice(1);
-    }
+    const capitalize = (str: string): string =>
+        str.charAt(0).toUpperCase() + str.slice(1);
 
     const handleEditClick = () => {
         setFormData(profile || defaultProfile);
         setMessage({ text: "", type: "" });
+        setGeoError("");
         setIsEditing(true);
     };
 
@@ -100,11 +109,35 @@ export default function MyProfile() {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    const handleGetLocation = () => {
+        if (!navigator.geolocation) {
+            setGeoError("Geolocation is not supported by your browser.");
+            return;
+        }
+        setGeoLoading(true);
+        setGeoError("");
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                setFormData(prev => ({
+                    ...prev,
+                    latitude: parseFloat(pos.coords.latitude.toFixed(6)),
+                    longitude: parseFloat(pos.coords.longitude.toFixed(6)),
+                }));
+                setGeoLoading(false);
+            },
+            (err) => {
+                setGeoError(`Could not get location: ${err.message}`);
+                setGeoLoading(false);
+            },
+            { enableHighAccuracy: true, timeout: 10000 }
+        );
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setMessage({ text: "", type: "" });
         setIsSaving(true);
-        
+
         try {
             await api.updateMyProfile({
                 display_name: formData.displayName,
@@ -115,13 +148,16 @@ export default function MyProfile() {
                 music_genre: formData.musicGenre,
                 looking_for: formData.lookingFor,
                 activity_level: formData.activityLevel,
-                location_id: formData.locationId ? parseInt(formData.locationId) : null
+                location_id: formData.locationId ? parseInt(formData.locationId) : null,
+                latitude: formData.latitude,
+                longitude: formData.longitude,
+                max_radius_km: formData.maxRadiusKm,
             });
             setProfile({ ...formData });
             setIsEditing(false);
         } catch (err: unknown) {
-            if (err instanceof Error) { setMessage({ text: err.message, type: 'error'})}
-            else { setMessage({ text: "Failed to update profile. Check your connection.", type: "error" })};
+            if (err instanceof Error) setMessage({ text: err.message, type: "error" });
+            else setMessage({ text: "Failed to update profile. Check your connection.", type: "error" });
         } finally {
             setIsSaving(false);
         }
@@ -131,17 +167,17 @@ export default function MyProfile() {
 
     return (
         <div className="container py-4">
-            <div className="card p-4 mx-auto" style={{ maxWidth: '640px' }}>
-                
+            <div className="card p-4 mx-auto" style={{ maxWidth: "640px" }}>
+
                 {!isEditing ? (
                     <div className="d-flex flex-column gap-4">
                         <div className="d-flex align-items-center gap-4 pb-4 border-bottom">
                             <div
                                 className="rounded-circle bg-body-secondary border d-flex align-items-center justify-content-center flex-shrink-0 fw-bold text-muted"
-                                style={{ width: 100, height: 100, fontSize: '2rem' }}
+                                style={{ width: 100, height: 100, fontSize: "2rem", overflow: "hidden" }}
                             >
                                 {profile?.avatarUrl ? (
-                                    <img className="rounded-circle" style={{ width: '100%', height: '100%', objectFit: 'cover' }} src={profile.avatarUrl} alt="Avatar" />
+                                    <img className="rounded-circle" style={{ width: "100%", height: "100%", objectFit: "cover" }} src={profile.avatarUrl} alt="Avatar" />
                                 ) : (
                                     <span>?</span>
                                 )}
@@ -149,44 +185,52 @@ export default function MyProfile() {
                             <div className="flex-grow-1">
                                 <h4 className="mb-1">{profile?.displayName || "Profile Incomplete"}</h4>
                                 <p className="text-muted small mb-0">
-                                    {profile ? `${profile.age} years old • ${getCityName(profile.locationId)}` : "Complete your profile to be discovered!"}
+                                    {profile
+                                        ? `${profile.age} years old • ${getCityName(profile.locationId)}`
+                                        : "Complete your profile to be discovered!"}
                                 </p>
+                                {profile?.latitude != null && (
+                                    <p className="text-muted small mb-0">
+                                        <i className="bi bi-geo-alt me-1"></i>
+                                        GPS set &bull; radius {profile.maxRadiusKm} km
+                                    </p>
+                                )}
                             </div>
                             <button className="btn btn-outline-secondary ms-auto" onClick={handleEditClick}>
-                                <i className="bi bi-gear me-2"></i> {profile ? "Edit Profile" : "Set up Profile"}
+                                <i className="bi bi-gear me-2"></i>{profile ? "Edit Profile" : "Set up Profile"}
                             </button>
                         </div>
 
                         {profile && (
                             <div className="d-flex flex-column gap-3">
                                 <div>
-                                    <p className="text-muted small text-uppercase mb-2" style={{ letterSpacing: '0.5px' }}>About Me</p>
+                                    <p className="text-muted small text-uppercase mb-2" style={{ letterSpacing: "0.5px" }}>About Me</p>
                                     <p className="p-3 rounded bg-body-secondary border text-muted">{profile.bio || "No bio added yet."}</p>
                                 </div>
 
                                 <div className="row g-3">
                                     <div className="col-6">
                                         <div className="p-3 rounded bg-body-secondary border h-100">
-                                            <span className="text-muted d-block mb-1" style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Gender</span>
+                                            <span className="text-muted d-block mb-1" style={{ fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.5px" }}>Gender</span>
                                             <span className="fw-semibold">{capitalize(profile.gender)}</span>
                                         </div>
                                     </div>
                                     <div className="col-6">
                                         <div className="p-3 rounded bg-body-secondary border h-100">
-                                            <span className="text-muted d-block mb-1" style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Looking For</span>
+                                            <span className="text-muted d-block mb-1" style={{ fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.5px" }}>Looking For</span>
                                             <span className="fw-semibold">{capitalize(profile.lookingFor)}</span>
                                         </div>
                                     </div>
                                     <div className="col-6">
                                         <div className="p-3 rounded bg-body-secondary border h-100">
-                                            <span className="text-muted d-block mb-1" style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Music</span>
-                                            <span className="fw-semibold"><i className="bi bi-music-note-beamed me-1"></i> {capitalize(profile.musicGenre)}</span>
+                                            <span className="text-muted d-block mb-1" style={{ fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.5px" }}>Music</span>
+                                            <span className="fw-semibold"><i className="bi bi-music-note-beamed me-1"></i>{capitalize(profile.musicGenre)}</span>
                                         </div>
                                     </div>
                                     <div className="col-6">
                                         <div className="p-3 rounded bg-body-secondary border h-100">
-                                            <span className="text-muted d-block mb-1" style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Activity</span>
-                                            <span className="fw-semibold"><i className="bi bi-lightning-charge me-1"></i> {capitalize(profile.activityLevel)}</span>
+                                            <span className="text-muted d-block mb-1" style={{ fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.5px" }}>Activity</span>
+                                            <span className="fw-semibold"><i className="bi bi-lightning-charge me-1"></i>{capitalize(profile.activityLevel)}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -200,8 +244,8 @@ export default function MyProfile() {
                             <button className="btn btn-outline-secondary" onClick={handleCancelClick} disabled={isSaving}>Cancel</button>
                         </div>
 
-                        {message.text && <div className={`alert ${message.type === 'error' ? 'alert-danger' : 'alert-success'}`}>{message.text}</div>}
-                        
+                        {message.text && <div className={`alert ${message.type === "error" ? "alert-danger" : "alert-success"}`}>{message.text}</div>}
+
                         <form onSubmit={handleSubmit} className="d-flex flex-column gap-3">
                             <div className="mb-0">
                                 <label className="form-label text-muted mb-1">Display Name</label>
@@ -270,15 +314,43 @@ export default function MyProfile() {
                                 </div>
                             </div>
 
-                            <label className="form-label text-muted mb-1">City</label>
-                            <div className="d-flex flex-column">
-                                <select className="form-select" name="locationId" value={formData.locationId} onChange={handleChange}>
-                                    {locations.map(loc => (
-                                        <option key={loc.id} value={loc.id}>
-                                            {loc.city} ({loc.country})
-                                        </option>
-                                    ))}
-                                </select>
+                            <label className="form-label text-muted mb-1">City (fallback)</label>
+                            <select className="form-select" name="locationId" value={formData.locationId} onChange={handleChange}>
+                                {locations.map(loc => (
+                                    <option key={loc.id} value={loc.id}>
+                                        {loc.city} ({loc.country})
+                                    </option>
+                                ))}
+                            </select>
+
+                            {/* GPS location section */}
+                            <div className="border rounded p-3 bg-body-secondary">
+                                <label className="form-label fw-semibold mb-2">
+                                    <i className="bi bi-geo-alt me-2"></i>GPS Location &amp; Match Radius
+                                </label>
+                                <p className="text-muted small mb-2">
+                                    Use your browser location for proximity-based matching. Only users within your chosen radius will be recommended.
+                                </p>
+                                <button type="button" className="btn btn-outline-primary btn-sm mb-2" onClick={handleGetLocation} disabled={geoLoading}>
+                                    {geoLoading ? "Getting location…" : formData.latitude != null ? "Update My Location" : "Use My Location"}
+                                </button>
+                                {geoError && <p className="text-danger small mb-1">{geoError}</p>}
+                                {formData.latitude != null && (
+                                    <p className="text-muted small mb-2">
+                                        <i className="bi bi-check-circle-fill text-success me-1"></i>
+                                        {formData.latitude.toFixed(4)}, {formData.longitude?.toFixed(4)}
+                                    </p>
+                                )}
+                                <label className="form-label text-muted small mb-1">Max radius (km)</label>
+                                <input
+                                    className="form-control form-control-sm"
+                                    type="number"
+                                    name="maxRadiusKm"
+                                    value={formData.maxRadiusKm}
+                                    onChange={handleChange}
+                                    min="1"
+                                    max="500"
+                                />
                             </div>
 
                             <button type="submit" className="btn btn-primary w-100 mt-2" disabled={isSaving}>

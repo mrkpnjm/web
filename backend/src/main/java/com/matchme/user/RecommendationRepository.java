@@ -29,6 +29,36 @@ public interface RecommendationRepository extends JpaRepository<User, UUID> {
         """, nativeQuery = true)
     List<UUID> findPotentialCandidates(@Param("userId") UUID userId, @Param("locationId") Long locationId);
 
+    @Query(value = """
+        SELECT DISTINCT u.id FROM users u
+        JOIN profiles p ON u.id = p.id
+        WHERE u.id != :userId
+        AND p.latitude IS NOT NULL
+        AND p.longitude IS NOT NULL
+        AND p.looking_for IS NOT NULL
+        AND u.id NOT IN (SELECT dismissed_id FROM dismissed_recommendations WHERE user_id = :userId)
+        AND u.id NOT IN (
+            SELECT receiver_id FROM connections WHERE sender_id = :userId
+            UNION
+            SELECT sender_id FROM connections WHERE receiver_id = :userId
+        )
+        AND (
+            6371 * acos(
+                LEAST(1.0,
+                    cos(radians(CAST(:myLat AS float8))) * cos(radians(p.latitude)) *
+                    cos(radians(p.longitude) - radians(CAST(:myLng AS float8))) +
+                    sin(radians(CAST(:myLat AS float8))) * sin(radians(p.latitude))
+                )
+            ) <= CAST(:radiusKm AS float8)
+        )
+        """, nativeQuery = true)
+    List<UUID> findCandidatesNearby(
+        @Param("userId") UUID userId,
+        @Param("myLat") double myLat,
+        @Param("myLng") double myLng,
+        @Param("radiusKm") int radiusKm
+    );
+
     @Modifying
     @Transactional
     @Query(value = "INSERT INTO dismissed_recommendations (user_id, dismissed_id) VALUES (:userId, :dismissedId)", nativeQuery = true)

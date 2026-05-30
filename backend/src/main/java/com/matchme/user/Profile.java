@@ -46,6 +46,12 @@ public class Profile {
     @Column(name = "activity_level")
     private String activityLevel;
 
+    private Double latitude;
+    private Double longitude;
+
+    @Column(name = "max_radius_km")
+    private Integer maxRadiusKm = 50;
+
     @Column(name = "created_at")
     private OffsetDateTime createdAt = OffsetDateTime.now();
 }
