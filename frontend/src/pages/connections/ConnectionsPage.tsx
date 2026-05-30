@@ -6,7 +6,7 @@ export function ConnectionsPage() {
   const [pendingRequests, setPendingRequests] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>("");
-  const [userNames, setUserNames] = useState<Record<string, string>>({});
+  const [userProfiles, setUserProfiles] = useState<Record<string, { name: string, avatar: string | null }>>({});
   const [activeTab, setActiveTab] = useState<"active" | "requests">("active");
 
   const loadConnectionsData = useCallback(async () => {
@@ -24,14 +24,14 @@ export function ConnectionsPage() {
 
       const uniqueIds = [...new Set([...active, ...pending])] as string[];
 
-      const nameEntries = await Promise.all(
+      const profileEntries = await Promise.all(
         uniqueIds.map(async (id: string) => {
           const user = await api.getUser(id).catch(() => null);
-          return [id, user?.name ?? id] as [string, string];
+          return [id, { name: user?.name ?? id, avatar: user?.profile_picture ?? null }];
         }),
       );
 
-      setUserNames(Object.fromEntries(nameEntries));
+      setUserProfiles(Object.fromEntries(profileEntries));
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
       setError(message || "Failed to load connections");
@@ -151,18 +151,23 @@ export function ConnectionsPage() {
         ) : (
           <div className="d-flex flex-column gap-3">
             {activeConnections.map((otherId) => {
-              const name = userNames[otherId] ?? otherId;
+              const profile = userProfiles[otherId] ?? { name: otherId, avatar: null };
               return (
                 <div key={otherId} className="card">
                   <div className="card-body d-flex align-items-center gap-3">
                     <div
                       className="rounded-circle bg-primary bg-opacity-25 text-primary fw-semibold d-flex align-items-center justify-content-center flex-shrink-0"
-                      style={{ width: 46, height: 46 }}
+                      style={{ width: 46, height: 46, overflow: 'hidden' }}
                     >
-                      {getInitials(name)}
+                      {/* Render the image if it exists, otherwise fallback to initials */}
+                      {profile.avatar ? (
+                          <img src={profile.avatar} alt={profile.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      ) : (
+                          getInitials(profile.name)
+                      )}
                     </div>
                     <div className="flex-grow-1">
-                      <p className="mb-0 fw-medium">{name}</p>
+                      <p className="mb-0 fw-medium">{profile.name}</p>
                     </div>
                     <div className="d-flex gap-2 flex-shrink-0">
                       <a
@@ -191,19 +196,24 @@ export function ConnectionsPage() {
         ) : (
           <div className="d-flex flex-column gap-3">
             {pendingRequests.map((senderId) => {
-              const name = userNames[senderId] ?? senderId;
+              const profile = userProfiles[senderId] ?? { name: senderId, avatar: null };
               return (
                 <div key={senderId} className="card border-warning">
                   <div className="card-body d-flex align-items-center gap-3">
                     <div
                       className="rounded-circle bg-warning bg-opacity-25 text-warning fw-semibold d-flex align-items-center justify-content-center flex-shrink-0"
-                      style={{ width: 46, height: 46 }}
+                      style={{ width: 46, height: 46, overflow: 'hidden' }}
                     >
-                      {getInitials(name)}
+                      {/* Render the image if it exists, otherwise fallback to initials */}
+                      {profile.avatar ? (
+                          <img src={profile.avatar} alt={profile.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      ) : (
+                          getInitials(profile.name)
+                      )}
                     </div>
                     <div className="flex-grow-1">
                       <p className="mb-0 fw-medium">
-                        {name}
+                        {profile.name}
                         <span className="badge bg-warning text-dark ms-2">
                           Pending
                         </span>
