@@ -32,7 +32,7 @@ export const Navbar = () => {
     try {
       await logout();
     } catch (error) {
-      console.log("Failed to log out", error);
+      console.error("Failed to log out", error);
     } finally {
       navigate("/login");
     }
