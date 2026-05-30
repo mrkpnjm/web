@@ -18,8 +18,9 @@ import java.util.UUID;
 public class ProfileController {
 
     private final ProfileRepository profileRepository;
-    private final UserRepository userRepository; 
+    private final UserRepository userRepository;
     private final ConnectionRepository connectionRepository;
+    private final RecommendationRepository recommendationRepository;
 
     @PutMapping("/me/profile")
     public ResponseEntity<Profile> updateMyProfile(@AuthenticationPrincipal User me, @RequestBody Profile updatedData) {
@@ -88,11 +89,27 @@ public class ProfileController {
     }
 
     private void checkAccess(UUID myId, UUID targetId) {
-        if (!myId.equals(targetId)) {
-            var connection = connectionRepository.findConnectionBetweenUsers(myId, targetId);
-            if (connection.isPresent() && connection.get().getStatus() == ConnectionStatus.DECLINED) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unauthorized: Profile unavailable");
-            }
+        if (myId.equals(targetId)) return;
+
+        var connection = connectionRepository.findConnectionBetweenUsers(myId, targetId);
+        if (connection.isPresent()) {
+            ConnectionStatus status = connection.get().getStatus();
+            if (status == ConnectionStatus.ACCEPTED || status == ConnectionStatus.PENDING) return;
+            // DECLINED: hide with 404 so a bad actor can't distinguish "blocked" from "not found"
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile not found");
+        }
+
+        // No connection — allow only if the target is in the caller's recommendation pool
+        // (same country, not dismissed, not already connected)
+        Profile myProfile = profileRepository.findById(myId).orElse(null);
+        if (myProfile == null || myProfile.getLocationId() == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile not found");
+        }
+        boolean isCandidate = recommendationRepository
+                .findPotentialCandidates(myId, myProfile.getLocationId())
+                .contains(targetId);
+        if (!isCandidate) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile not found");
         }
     }
 
