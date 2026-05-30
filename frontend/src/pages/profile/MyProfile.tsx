@@ -341,16 +341,18 @@ export default function MyProfile() {
                                         {formData.latitude.toFixed(4)}, {formData.longitude?.toFixed(4)}
                                     </p>
                                 )}
-                                <label className="form-label text-muted small mb-1">Max radius (km)</label>
-                                <input
-                                    className="form-control form-control-sm"
-                                    type="number"
-                                    name="maxRadiusKm"
-                                    value={formData.maxRadiusKm}
-                                    onChange={handleChange}
-                                    min="1"
-                                    max="500"
-                                />
+                                <div className="mt-2">
+                                    <label className="form-label text-muted small mb-1">Max radius (km)</label>
+                                    <input
+                                        className="form-control form-control-sm"
+                                        type="number"
+                                        name="maxRadiusKm"
+                                        value={formData.maxRadiusKm}
+                                        onChange={handleChange}
+                                        min="1"
+                                        max="500"
+                                    />
+                                </div>
                             </div>
 
                             <button type="submit" className="btn btn-primary w-100 mt-2" disabled={isSaving}>
