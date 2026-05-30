@@ -33,9 +33,9 @@ export default function ChatView() {
     }, [subscribe, userId]);
 
     useEffect(() => {
-        if (!userId) return;
+        if (!userId || !myId) return;
         api.getMessages(userId).then(setMessages).catch(console.error);
-    }, [userId]);
+    }, [userId, myId]);
 
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -61,6 +61,12 @@ export default function ChatView() {
         setInput("");
     }
 
+    if (!myId) return (
+        <div className="d-flex align-items-center justify-content-center h-100 text-muted">
+            Loading messages...
+        </div>
+    );
+
     return (
         <div className="d-flex flex-column" style={{ height: 'calc(100vh - 60px)' }}>
             <div className="d-flex align-items-center gap-2 px-3 py-2 border-bottom">
@@ -69,7 +75,7 @@ export default function ChatView() {
             </div>
             <div className="flex-grow-1 overflow-y-auto p-3 d-flex flex-column gap-2">
                 <div className="flex-grow-1" />
-                {messages.map(msg => (
+                {myId && messages.map(msg => (
                     <div
                         key={msg.id}
                         className={msg.sender_id === myId
