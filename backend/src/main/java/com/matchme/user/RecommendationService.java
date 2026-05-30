@@ -1,6 +1,17 @@
-/* This is the core "Scorer". It takes the filtered list from the database, 
-enforces the "completed profile" rule, scores the remaining users to weed out 
-obviously poor matches, and returns exactly the top 10 IDs. */
+/* This is the core "Scorer". It takes the city-filtered list from the database,
+enforces the "completed profile" rule, scores the remaining users to weed out
+obviously poor matches, and returns exactly the top 10 IDs.
+
+Scoring factors (higher = better match):
+  - looking_for mismatch     → -1  (hard reject, obviously poor match)
+  - shared music genre       → +10
+  - shared activity level    → +5
+  - per shared interest      → +3 each
+  - age difference ≤3 yrs    → +5
+  - age difference ≤7 yrs    → +3
+  - age difference ≤15 yrs   → +1
+  - compatible but no match  → +1 (base score so they still appear)
+*/
 
 package com.matchme.user;
 
@@ -17,6 +28,7 @@ public class RecommendationService {
 
     private final RecommendationRepository recommendationRepository;
     private final ProfileRepository profileRepository;
+    private final InterestRepository interestRepository;
 
     public List<UUID> getRecommendations(User me) {
         Profile myProfile = profileRepository.findById(me.getId()).orElse(null);
@@ -51,26 +63,39 @@ public class RecommendationService {
     private double calculateScore(Profile me, Profile other) {
         double score = 0;
 
-        // "Obviously poor match" filter - if they want completely different things
-        if (me.getLookingFor() != null && other.getLookingFor() != null 
-            && !me.getLookingFor().equalsIgnoreCase(other.getLookingFor())) {
-            return -1.0; 
+        // Hard reject: incompatible intentions are an obviously poor match
+        if (me.getLookingFor() != null && other.getLookingFor() != null
+                && !me.getLookingFor().equalsIgnoreCase(other.getLookingFor())) {
+            return -1.0;
         }
 
-        // Prioritization scoring
+        // Music genre compatibility
         if (me.getMusicGenre() != null && me.getMusicGenre().equalsIgnoreCase(other.getMusicGenre())) {
             score += 10.0;
         }
+
+        // Activity level compatibility
         if (me.getActivityLevel() != null && me.getActivityLevel().equalsIgnoreCase(other.getActivityLevel())) {
             score += 5.0;
         }
-        
-        // Bonus points for being in the exact same city
-        if (me.getLocationId() != null && me.getLocationId().equals(other.getLocationId())) {
-            score += 5.0; 
+
+        // Shared interests (+3 per shared interest)
+        List<String> myInterests = interestRepository.findByUser_Id(me.getId())
+                .stream().map(Interest::getInterest).toList();
+        List<String> otherInterests = interestRepository.findByUser_Id(other.getId())
+                .stream().map(Interest::getInterest).toList();
+        long sharedInterests = myInterests.stream().filter(otherInterests::contains).count();
+        score += sharedInterests * 3.0;
+
+        // Age compatibility
+        if (me.getAge() != null && other.getAge() != null) {
+            int ageDiff = Math.abs(me.getAge() - other.getAge());
+            if (ageDiff <= 3)       score += 5.0;
+            else if (ageDiff <= 7)  score += 3.0;
+            else if (ageDiff <= 15) score += 1.0;
         }
 
-        // Base score for simply existing in the same country with compatible 'looking_for'
+        // Base score: compatible but no specific overlap — still a valid candidate
         if (score == 0) score = 1.0;
 
         return score;

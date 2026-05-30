@@ -17,13 +17,13 @@ public interface RecommendationRepository extends JpaRepository<User, UUID> {
     @Query(value = """
         SELECT DISTINCT u.id FROM users u
         JOIN profiles p ON u.id = p.id
-        JOIN locations l ON p.location_id = l.id
         WHERE u.id != :userId
-        AND l.country = (SELECT country FROM locations WHERE id = :locationId)
+        AND p.location_id = :locationId
+        AND p.looking_for IS NOT NULL
         AND u.id NOT IN (SELECT dismissed_id FROM dismissed_recommendations WHERE user_id = :userId)
         AND u.id NOT IN (
-            SELECT receiver_id FROM connections WHERE sender_id = :userId 
-            UNION 
+            SELECT receiver_id FROM connections WHERE sender_id = :userId
+            UNION
             SELECT sender_id FROM connections WHERE receiver_id = :userId
         )
         """, nativeQuery = true)
