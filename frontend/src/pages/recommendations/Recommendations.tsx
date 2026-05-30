@@ -133,10 +133,10 @@ export default function Recommendations() {
                                     <h5 className="card-title fw-semibold mb-1">{rec.name}, <span className="fw-normal text-muted">{rec.age}</span></h5>
                                     <p className="card-text text-muted small flex-grow-1 mb-3">"{rec.bio}"</p>
                                     <div className="d-flex flex-wrap gap-1 mb-3">
-                                        <span className="badge rounded-pill border text-muted small" style={{ backgroundColor: 'transparent' }}>📍 {getCityName(rec.locationId)}</span>
-                                        <span className="badge rounded-pill border text-muted small" style={{ backgroundColor: 'transparent' }}>🎯 {rec.lookingFor}</span>
-                                        <span className="badge rounded-pill border text-muted small" style={{ backgroundColor: 'transparent' }}>🎵 {rec.musicGenre}</span>
-                                        <span className="badge rounded-pill border text-muted small" style={{ backgroundColor: 'transparent' }}>⚡ {rec.activityLevel}</span>
+                                        <span className="badge rounded-pill border text-muted small" style={{ backgroundColor: 'transparent' }}><i className="bi bi-geo-alt me-1"></i> {getCityName(rec.locationId)}</span>
+                                        <span className="badge rounded-pill border text-muted small" style={{ backgroundColor: 'transparent' }}><i className="bi bi-search me-1"></i> {rec.lookingFor}</span>
+                                        <span className="badge rounded-pill border text-muted small" style={{ backgroundColor: 'transparent' }}><i className="bi bi-music-note-beamed me-1"></i> {rec.musicGenre}</span>
+                                        <span className="badge rounded-pill border text-muted small" style={{ backgroundColor: 'transparent' }}><i className="bi bi-lightning-charge me-1"></i> {rec.activityLevel}</span>
                                     </div>
                                     <div className="d-flex gap-2 mt-auto">
                                         <button className="btn btn-outline-danger flex-fill" onClick={() => handleDismiss(rec.id)}>Dismiss</button>

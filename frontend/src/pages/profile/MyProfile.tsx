@@ -153,7 +153,7 @@ export default function MyProfile() {
                                 </p>
                             </div>
                             <button className="btn btn-outline-secondary ms-auto" onClick={handleEditClick}>
-                                ⚙️ {profile ? "Edit Profile" : "Set up Profile"}
+                                <i className="bi bi-gear me-2"></i> {profile ? "Edit Profile" : "Set up Profile"}
                             </button>
                         </div>
 
@@ -180,13 +180,13 @@ export default function MyProfile() {
                                     <div className="col-6">
                                         <div className="p-3 rounded bg-body-secondary border h-100">
                                             <span className="text-muted d-block mb-1" style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Music</span>
-                                            <span className="fw-semibold">🎵 {capitalize(profile.musicGenre)}</span>
+                                            <span className="fw-semibold"><i className="bi bi-music-note-beamed me-1"></i> {capitalize(profile.musicGenre)}</span>
                                         </div>
                                     </div>
                                     <div className="col-6">
                                         <div className="p-3 rounded bg-body-secondary border h-100">
                                             <span className="text-muted d-block mb-1" style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Activity</span>
-                                            <span className="fw-semibold">⚡ {capitalize(profile.activityLevel)}</span>
+                                            <span className="fw-semibold"><i className="bi bi-lightning-charge me-1"></i> {capitalize(profile.activityLevel)}</span>
                                         </div>
                                     </div>
                                 </div>
