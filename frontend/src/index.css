@@ -50,8 +50,6 @@
   font-weight: 500;
 }
 
-
-
 .navbar a {
   color: #8892a4;
   text-decoration: none
@@ -75,3 +73,14 @@
   background-color: #92400e;
   color: #ceb56d;
 }
+
+.online-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.online-dot.online { background: #4caf50; }
+
+.online-dot.offline { background: #4a5568; }
