@@ -169,15 +169,15 @@ export function ConnectionsPage() {
                     <div className="flex-grow-1">
                       <p className="mb-0 fw-medium">{profile.name}</p>
                     </div>
-                    <div className="d-flex gap-2 flex-shrink-0">
-                      <a href={`/profile/${otherId}`} className="btn btn-outline-secondary">
+                    <div className="d-flex flex-wrap gap-2 flex-shrink-0">
+                      <a href={`/profile/${otherId}`} className="btn btn-outline-secondary btn-sm">
                         Profile
                       </a>
-                      <a href={`/chat/${otherId}`} className="btn btn-outline-secondary">
+                      <a href={`/chat/${otherId}`} className="btn btn-outline-secondary btn-sm">
                         Message
                       </a>
                       <button
-                        className="btn btn-outline-secondary"
+                        className="btn btn-outline-secondary btn-sm"
                         onClick={() => handleRemove(otherId)}
                       >
                         Remove
@@ -219,7 +219,7 @@ export function ConnectionsPage() {
                         </span>
                       </p>
                     </div>
-                    <div className="d-flex gap-2 flex-shrink-0">
+                    <div className="d-flex flex-wrap gap-2 flex-shrink-0">
                       <button
                         className="btn btn-success btn-sm"
                         onClick={() => handleAccept(senderId)}
