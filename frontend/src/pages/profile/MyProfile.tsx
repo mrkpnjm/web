@@ -220,7 +220,14 @@ export default function MyProfile() {
 
                             <div className="mb-0">
                                 <label className="form-label text-muted mb-1">Avatar URL</label>
-                                <input className="form-control" name="avatarUrl" value={formData.avatarUrl} onChange={handleChange} placeholder="https://example.com/pic.jpg" />
+                                <div className="d-flex gap-2">
+                                    <input className="form-control" name="avatarUrl" value={formData.avatarUrl} onChange={handleChange} placeholder="https://example.com/pic.jpg" />
+                                    {formData.avatarUrl && (
+                                        <button type="button" className="btn btn-outline-danger" onClick={() => setFormData(prev => ({ ...prev, avatarUrl: "" }))}>
+                                            Remove
+                                        </button>
+                                    )}
+                                </div>
                             </div>
 
                             <div className="row g-3">
