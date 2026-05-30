@@ -50,11 +50,15 @@ public class RecommendationService {
         }
 
         // 2. Score, sort, and limit candidates
+        // Pre-load caller's interests once to avoid N+1 queries in the scoring loop
+        List<String> myInterests = interestRepository.findByUser_Id(myProfile.getId())
+                .stream().map(Interest::getInterest).toList();
+
         return candidateIds.stream()
                 .map(id -> {
                     Profile otherProfile = profileRepository.findById(id).orElse(null);
                     if (otherProfile == null) return new MatchScore(id, -1);
-                    return new MatchScore(id, calculateScore(myProfile, otherProfile));
+                    return new MatchScore(id, calculateScore(myProfile, myInterests, otherProfile));
                 })
                 .filter(match -> match.score() > 0) // Requirement: Avoid obviously poor matches
                 .sorted(Comparator.comparingDouble(MatchScore::score).reversed())
@@ -67,7 +71,7 @@ public class RecommendationService {
         recommendationRepository.dismissRecommendation(myId, dismissedId);
     }
 
-    private double calculateScore(Profile me, Profile other) {
+    private double calculateScore(Profile me, List<String> myInterests, Profile other) {
         double score = 0;
 
         // Hard reject: incompatible intentions are an obviously poor match
@@ -87,8 +91,6 @@ public class RecommendationService {
         }
 
         // Shared interests (+3 per shared interest)
-        List<String> myInterests = interestRepository.findByUser_Id(me.getId())
-                .stream().map(Interest::getInterest).toList();
         List<String> otherInterests = interestRepository.findByUser_Id(other.getId())
                 .stream().map(Interest::getInterest).toList();
         long sharedInterests = myInterests.stream().filter(otherInterests::contains).count();
