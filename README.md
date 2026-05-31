@@ -5,25 +5,33 @@ A social matching platform where users can discover people nearby, connect, and 
 ## Tech Stack
 
 - **Backend:** Java 17, Spring Boot 3.2.5, Spring Security, WebSocket
-- **Frontend:** React 18, TypeScript, Vite
+- **Frontend:** React 18, TypeScript, Vite, Bootstrap 5
 - **Database:** PostgreSQL 15 (migrations via Liquibase)
 - **Auth:** JWT (stateless)
 
 ## Prerequisites
 
 - Java 17+
+- Maven 3.6+
 - Node.js 18+
-- Docker + Docker Compose
+- Docker + Docker Compose V2 (`docker compose`, not `docker-compose`)
 
 ## Setup
 
-### 1. Start the database
+### 1. Clone the repository
+
+```bash
+git clone <repo-url>
+cd match-me
+```
+
+### 2. Start the database
 
 ```bash
 sudo docker compose up -d
 ```
 
-### 2. Start the backend
+### 3. Start the backend
 
 ```bash
 cd backend
@@ -44,7 +52,7 @@ Optionally override the JWT signing secret:
 export JWT_SECRET=your-long-random-secret
 ```
 
-### 3. Start the frontend
+### 4. Start the frontend
 
 ```bash
 cd frontend
