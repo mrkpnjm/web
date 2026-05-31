@@ -30,10 +30,18 @@ cd backend
 mvn spring-boot:run
 ```
 
+Backend runs at `http://localhost:8080`
+
 To also seed 100 fictitious users on first run:
 
 ```bash
 mvn spring-boot:run -Dspring-boot.run.profiles=seed
+```
+
+Optionally override the JWT signing secret:
+
+```bash
+export JWT_SECRET=your-long-random-secret
 ```
 
 ### 3. Start the frontend
@@ -65,6 +73,8 @@ mvn spring-boot:run -Dspring-boot.run.profiles=seed
 
 ## API Overview
 
+All endpoints except `/auth/**` require the header `Authorization: Bearer <jwt>`.
+
 ### Auth
 | Method | Path | Description |
 |--------|------|-------------|
@@ -82,6 +92,15 @@ mvn spring-boot:run -Dspring-boot.run.profiles=seed
 | GET | `/users/:id` | Another user's basic info (no email) |
 | GET | `/users/:id/profile` | Another user's about-me info |
 | GET | `/users/:id/bio` | Another user's biographical data |
+
+`PUT /me/profile` accepts: `display_name`, `bio`, `avatar_url`, `location_id`, `age`, `gender`, `music_genre`, `looking_for`, `activity_level`, `latitude`, `longitude`, `max_radius_km`
+
+`/me/profile` returns public-facing info (display name, avatar, about-me). `/me/bio` returns matching-relevant fields (age, gender, location, interests, search radius).
+
+### Locations
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/locations` | Returns list of available locations |
 
 ### Recommendations
 | Method | Path | Description |
@@ -104,8 +123,32 @@ mvn spring-boot:run -Dspring-boot.run.profiles=seed
 |--------|------|-------------|
 | GET | `/chats` | All chats, most recent first |
 | GET | `/chats/:userId?page=1` | Message history (paginated, 30/page) |
-| POST | `/chats/:userId` | Send a message |
+| POST | `/chats/:userId` | Send a message. Body: `{ "content": "..." }` |
 
 ### WebSocket
 
 Connect to `ws://localhost:8080/ws/chat?token=<jwt>` for real-time messaging, typing indicators, and online/offline status.
+
+**Incoming events** (server → client):
+
+| `type` | Additional fields | Description |
+|--------|-------------------|-------------|
+| `message` | `message` (object) | New incoming message |
+| `typing` | `from`, `isTyping` (bool) | Other user's typing state |
+| `online` | `userId`, `online` (bool) | User came online or offline |
+
+**Outgoing events** (client → server):
+
+| `type` | Additional fields | Description |
+|--------|-------------------|-------------|
+| `message` | `to`, `content` | Send a message |
+| `typing` | `to`, `isTyping` (bool) | Broadcast typing state |
+
+## Features
+
+- **Authentication** — Register and log in with email and password. All sessions are stateless via JWT.
+- **Profile setup** — Users fill out a profile with display name, avatar, bio, age, gender, location, music taste, activity level, and what they are looking for.
+- **Location-based recommendations** — The platform suggests up to 10 candidate users based on proximity (GPS coordinates or city) and shared interests. Unwanted suggestions can be dismissed.
+- **Connections** — Users can send, accept, and decline connection requests. Only accepted connections can exchange messages.
+- **Real-time chat** — Connected users can chat via WebSocket with live typing indicators and online/offline presence.
+- **Paginated message history** — Past conversations are loaded 30 messages per page.
