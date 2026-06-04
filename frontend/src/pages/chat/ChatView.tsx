@@ -7,15 +7,15 @@ import { Message } from "../../types";
 
 export default function ChatView() {
     const { userId } = useParams<{ userId: string }>();
-    const {userId: myId } = useAuth();
+    const { userId: myId } = useAuth();
+    const { send, subscribe, isOnline } = useWS();
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState("");
     const [isTyping, setIsTyping] = useState(false);
     const [otherTyping, setOtherTyping] = useState(false);
-    const [otherOnline, setOtherOnline] = useState(false);
+    const [otherOnline, setOtherOnline] = useState(() => isOnline(userId ?? ""));
     const bottomRef = useRef<HTMLDivElement>(null);
     const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-    const { send, subscribe } = useWS();
 
     useEffect(() => {
         return subscribe((msg: unknown) => {

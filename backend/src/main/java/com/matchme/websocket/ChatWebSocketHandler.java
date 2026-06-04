@@ -33,6 +33,18 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         UUID userId = getUserId(session);
         if (userId == null) { closeSession(session); return; }
         sessions.put(userId, session);
+
+        // Tell the newly connected user which other users are already online
+        for (UUID onlineId : sessions.keySet()) {
+            if (!onlineId.equals(userId)) {
+                try {
+                    send(userId, Map.of("type", "online", "userId", onlineId, "online", true));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
         broadcast(Map.of("type", "online", "userId", userId, "online", true));
     }
 

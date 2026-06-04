@@ -5,11 +5,13 @@ type Handler = (msg: unknown) => void;
 interface WSContextType {
     send: (payload: unknown) => void;
     subscribe: (handler: Handler) => () => void;
+    isOnline: (userId: string) => boolean;
 }
 
 const WebSocketContext = createContext<WSContextType>({
     send: () => {},
     subscribe: () => () => {},
+    isOnline: () => false,
 });
 
 const WS_URL = import.meta.env.VITE_WS_URL || "ws://localhost:8080/ws/chat";
@@ -17,6 +19,7 @@ const WS_URL = import.meta.env.VITE_WS_URL || "ws://localhost:8080/ws/chat";
 export function WebSocketProvider({ token, children }: { token: string | null; children: React.ReactNode }) {
     const ws = useRef<WebSocket | null>(null);
     const handlers = useRef<Set<Handler>>(new Set());
+    const onlineUsers = useRef<Map<string, boolean>>(new Map());
 
     useEffect(() => {
         if (!token) return;
@@ -36,7 +39,10 @@ export function WebSocketProvider({ token, children }: { token: string | null; c
 
         socket.onmessage = (e) => {
             try {
-                const msg = JSON.parse(e.data);
+                const msg = JSON.parse(e.data) as { type: string; userId?: string; online?: boolean };
+                if (msg.type === "online" && msg.userId !== undefined) {
+                    onlineUsers.current.set(msg.userId, msg.online ?? false);
+                }
                 handlers.current.forEach(h => h(msg));
             } catch {}
         };
@@ -62,8 +68,12 @@ export function WebSocketProvider({ token, children }: { token: string | null; c
         return () => { handlers.current.delete(handler); };
     }, []);
 
+    const isOnline = useCallback((userId: string) => {
+        return onlineUsers.current.get(userId) ?? false;
+    }, []);
+
     return (
-        <WebSocketContext.Provider value={{ send, subscribe }}>
+        <WebSocketContext.Provider value={{ send, subscribe, isOnline }}>
             {children}
         </WebSocketContext.Provider>
     );
